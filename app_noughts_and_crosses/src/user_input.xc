@@ -9,7 +9,7 @@ clock clky = XS1_CLKBLK_2;
 port capx = XS1_PORT_4A;
 port capy = XS1_PORT_4B;
 
-void user_input(chanend to_strategy, chanend to_output) {
+void user_input(chanend to_output) {
     slider x, y;
     slider_init(x, capx, clkx, 4, 1000, 150);
     slider_init(y, capy, clky, 4, 1000, 150);

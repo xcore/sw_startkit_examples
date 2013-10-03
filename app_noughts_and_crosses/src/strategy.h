@@ -1,1 +1,1 @@
-void strategy(chanend from_input, chanend to_output);
+void strategy(chanend to_output);
