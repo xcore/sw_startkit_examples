@@ -1,4 +1,8 @@
-#include <xs1.h>
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
+
 #include <xs1.h>
 
 /*
@@ -12,9 +16,9 @@
  * The four patterns below drive a dash, backslash, pipe, and slash.
  */
 
-#define MODES    8
-
 #define MIDDLE 0x00800
+
+#define MODES    8
 
 int leds[MODES] = {
     0xA1F80,
@@ -38,23 +42,23 @@ int main(void) {
     int led_counter = 0;     // A counter to count through the leds array
     int middle = 0;          // state of the middle led. Off initially
     
-    tmr :> now;
+    tmr :> now;              // Get the current time, this is maintained in now
     while(1) {
-        int new_led_counter = led_counter+1;
-        int new_middle = middle;
-        if (new_led_counter == MODES) {
-            new_led_counter = 0;
-            new_middle = new_middle ^ MIDDLE;  // toggle middle led.
-        }
-        for(int i = 0; i < delay; i ++) {
-            p32 <: leds[new_led_counter] ^ new_middle;
-            tmr when timerafter(now+pwm_period*i/delay) :> void;
-            p32 <: leds[led_counter] ^ middle;
-            now += pwm_period;
-            tmr when timerafter(now) :> void;
-        }
-        led_counter = new_led_counter;
-        middle = new_middle;
+        int new_led_counter = led_counter+1;      // Next pattern
+        int new_middle = middle;                  // and next middle LED status
+        if (new_led_counter == MODES) {           // If we have gone around all patterns
+            new_led_counter = 0;                  // Go back to the first pattern
+            new_middle = new_middle ^ MIDDLE;     // and toggle the middle led.
+        }                                         // To PWM we repeatedly push two LED
+        for(int i = 0; i < delay; i ++) {         // patterns, for a total of 1 ms
+            p32 <: leds[new_led_counter] ^ new_middle;           // new pattern
+            tmr when timerafter(now+pwm_period*i/delay) :> void; // Wait for i/delay %
+            p32 <: leds[led_counter] ^ middle;                   // old pattern
+            now += pwm_period;                                   // Wait for rest
+            tmr when timerafter(now) :> void;                    // increase i for gentle
+        }                                                        // change to brightness
+        led_counter = new_led_counter;            // Move on to the next pattern and
+        middle = new_middle;                      // the next middle LED status
     }
     return 0;
 }
