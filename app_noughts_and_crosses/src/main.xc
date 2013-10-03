@@ -6,10 +6,6 @@
 #include <xs1.h>
 
 void xscope_user_init(void) {
-    xscope_register(3,
-                    XSCOPE_CONTINUOUS, "X Value", XSCOPE_INT, "Value",
-                    XSCOPE_CONTINUOUS, "Y Value", XSCOPE_INT, "Value",
-                    XSCOPE_CONTINUOUS, "Z Value", XSCOPE_INT, "Value");
     xscope_config_io(XSCOPE_IO_BASIC);
 }
 
