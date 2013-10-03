@@ -3,7 +3,7 @@ Balance the ball (LED)
 
 This program requires an accelerometer slice.
 
-It shows a ball (represneted by a LED with some antialiasing) and when the
+It shows a ball (represented by a LED with some antialiasing) and when the
 startKIT is tilted the ball will roll to the edge.
 
 Implementation

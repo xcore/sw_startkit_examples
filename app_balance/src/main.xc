@@ -1,3 +1,8 @@
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
+
 #include <xs1.h>
 #include <stdio.h>
 
@@ -23,14 +28,20 @@ int leds[3][3] = {
 /* This the port where the leds reside */
 port p32 = XS1_PORT_32A;
 
+/* This section of code filters and averages values */
+
 #define H 32
 
 struct history {
-    int values[H];
-    int w;
-    int av;
+    int values[H];     // A filter that holds 32 old values
+    int w;             // index of the oldest value in the array
+    int av;            // Running average of all values
 };
 
+/** This function initialises the running average. It sets all old values
+ * to zero, the running average to 0 (the sum of all values), and it sets
+ * the 2 index to some legal value (0).
+ */
 void filter_init(struct history &h) {
     h.w = 0;
     h.av = 0;
@@ -39,6 +50,11 @@ void filter_init(struct history &h) {
     }
 }
 
+/** This function adds a sample to the history, and computes a new average.
+ * The running average is adapted by subtracting the oldest value, and
+ * adding in the new value. The new value is then stored, and the sum is
+ * returned
+ */
 int filter(struct history &h, int value) {
     h.av += value;
     h.av -= h.values[h.w];
@@ -50,6 +66,29 @@ int filter(struct history &h, int value) {
     return h.av;
 }
 
+#define FULL_SCALE  1024
+
+/** This function takes a number and splits it into a sign (-1, 1) and a
+ * value between 0 and FULL_SCALE to identify the fraction. The input value
+ * is in the range -10..10, is then filtered (which produces a sum of H
+ * values, hence a factor H higher), the filtered value is hence divided by
+ * 10 * H after being divided by the full scale.
+ */
+void split(int value, struct history &h, int &sign, int &partial) {
+    int scale = 10 * H;
+    int filtered = filter(h, value);
+    if (filtered < 0) {
+        sign = -1;
+        partial = (-filtered)*FULL_SCALE/scale;
+    } else {
+        sign = 1;
+        partial = (filtered)*FULL_SCALE/scale;
+    }
+    if (partial > FULL_SCALE) {
+        partial = FULL_SCALE;
+    }
+}
+
 void ball(chanend c) {
     struct history zvalues, xvalues;
     filter_init(xvalues);
@@ -58,46 +97,32 @@ void ball(chanend c) {
     timer tmr;           // Create a timer to time transistions
     int now;             // A variable to hold the current time
     int delay = 100000;  // 1 ms 
-    int sx = 1, sy = 1;
-    int px = 1024, py = 0;
-    tmr :> now;
+    int sx = 1, sy = 1;  // sign: -1 or 1, ball is either left or right of centre
+    int px = 0, py = 0;  // partial: 0..FULL_SCALE: 0 means centre, FULL_SCALE means edge
+    tmr :> now;          // Initialise current time
     while(1) {
         select {
-        case c :> x:
+        case c :> x:     // If the accelerometer has a new X/Y/Z value
             c :> y;
             c :> z;
-            int scale = 10 * H;
-          //  printf("%d %d %d\n", x, y, z);
-            int filteredz = filter(zvalues, z);
-            if (filteredz < 0) {
-                sy = -1;
-                py = (-filteredz)*1024/scale;
-            } else {
-                sy = 1;
-                py = (filteredz)*1024/scale;
-            }
-            int filteredx = filter(xvalues, x);
-            if (filteredx < 0) {
-                sx = -1;
-                px = (-filteredx)*1024/scale;
-            } else {
-                sx = 1;
-                px = (filteredx)*1024/scale;
-            }
-            if (py > 1024) py = 1024;
-            if (px > 1024) px = 1024;
+            split(z, zvalues, sy, py);  // split them into a sign and partial value
+            split(x, xvalues, sx, px);  // for both X and Y
             break;
-        default:
+        default:                        // otherwise continue to modulate the LEDs
             break;
         }
-        p32 <: leds[1][1];
-        tmr when timerafter(now+=delay*(1024-px)/1024*(1024-py)/1024) :> void;
-        p32 <: leds[1][1+sy];
-        tmr when timerafter(now+=delay*(1024-px)/1024*py/1024) :> void;
-        p32 <: leds[1+sx][1];
-        tmr when timerafter(now+=delay*px/1024*(1024-py)/1024) :> void;
-        p32 <: leds[1+sx][1+sy];
-        tmr when timerafter(now+=delay*px/1024*py/1024) :> void;
+        p32 <: leds[1][1];              // Drive center led for 1-px * 1-py fraction of time
+        now += delay * (FULL_SCALE-px)/FULL_SCALE * (FULL_SCALE-py)/FULL_SCALE;
+        tmr when timerafter(now) :> void;
+        p32 <: leds[1][1+sy];           // Drive led 1 down/up for 1-px * py fraction
+        now += delay * (FULL_SCALE-px)/FULL_SCALE * py/FULL_SCALE;
+        tmr when timerafter(now) :> void;
+        p32 <: leds[1+sx][1];           // Drive led 1 right/keft for px * 1-py fraction
+        now += delay * px/FULL_SCALE * (FULL_SCALE-py)/FULL_SCALE;
+        tmr when timerafter(now) :> void;
+        p32 <: leds[1+sx][1+sy];        // Drive led on diagoanl for px * py fraction
+        now += delay * px/FULL_SCALE * py/FULL_SCALE;
+        tmr when timerafter(now) :> void;
     }
 }
 
