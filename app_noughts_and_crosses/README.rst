@@ -1,11 +1,12 @@
-Noughts and crosses
-===================
+Noughts and crosses (tic-tac-toe)
+=================================
 
 
 This is a program that plays noughts and crosses on a startKIT.
 The 3x3 display of LEDs shows the board status:
- - full LEDs: X
- - dimmed LEDs: O
+
+ - full LEDs: X, user
+ - dimmed LEDs: O, computer
 
 WHen it is the user's move one of the LEDs flashes - this is a cursor and
 it can be moved by swiping the sliders. Pressing the button makes a move,

@@ -1,3 +1,8 @@
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
+
 #include "strategy.h"
 #include "random.h"
 
@@ -11,7 +16,8 @@
 #define LOST_SCORE    (-1 << 16)
 #define NEUTRAL_SCORE (0)
 
-
+/** Function that scores a board - returns one of the three scores above.
+ */
 int score(char board[3][3], int who) {
     for(int j = 0; j < 3; j++) {
         if (board[0][j] == EMPTY) {
@@ -54,6 +60,9 @@ int score(char board[3][3], int who) {
     return NEUTRAL_SCORE;
 }
 
+/** Standard game search - brute force. Pick longest game if there is a choice.
+ */
+
 int best_move(char board[3][3], int who, int &best_i, int &best_j) {
     int initial_score = LOST_SCORE * 1024;
     int best_score = initial_score;
@@ -83,6 +92,10 @@ int best_move(char board[3][3], int who, int &best_i, int &best_j) {
     }
 }
 
+/** Strategy process. Flips a random number to decide who starts, make a
+ * random first move if required, and then wait for the user move, compute
+ * a new move, and report the new move. When finished, reinitialise the board, and start again.
+ */
 void strategy(chanend to_output) {
     char board[3][3];
     timer t;
