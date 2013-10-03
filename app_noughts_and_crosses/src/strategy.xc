@@ -98,8 +98,6 @@ int best_move(char board[3][3], int who, int &best_i, int &best_j) {
  */
 void strategy(chanend to_output) {
     char board[3][3];
-    timer t;
-    int now;
 
     while(1) {
         int i, j;
