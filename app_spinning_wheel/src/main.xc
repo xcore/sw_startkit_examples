@@ -1,0 +1,42 @@
+#include <xs1.h>
+#include <xs1.h>
+
+/*
+ * the patterns for each bit are:
+ *   0x80000 0x40000 0x20000 
+ *   0x01000 0x00800 0x00400 
+ *   0x00200 0x00100 0x00080 
+ *
+ * As the leds go to 3V3, 0x00000 drives all 9 leds on, and 0xE1F80 drives
+ * all nine leds off.
+ * The four patterns below drive a dash, backslash, pipe, and slash.
+ */
+
+int leds[4] = {
+    0xE0380,
+    0x61700,
+    0xA1680,
+    0xC1580
+};
+
+/* This the port where the leds reside */
+port p32 = XS1_PORT_32A;
+
+int main(void) {
+    timer tmr;           // Create a timer to time transistions
+    int now;             // A variable to hold the current time
+    int delay = 5000000; // initial delay 50 ms (in 100 MHz ticks)
+    int led_counter = 0; // A counter to count through the leds array
+    tmr :> now;
+    while(1) {
+        now += delay;    
+        delay += 1 * 1000 * 100;
+        tmr when timerafter(now) :> void;
+        p32 <: leds[led_counter];
+        led_counter++;
+        if (led_counter == 4) {
+            led_counter = 0;
+        }
+    }
+    return 0;
+}
