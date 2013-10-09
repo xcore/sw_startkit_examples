@@ -42,7 +42,7 @@ int create_word(char display[3][3], int cursorx, int cursory) {
                     if ((index & slow_bit) || ((index & fast_bit) == fast_bit)) {
                         word &= ~map[i][j];
                     }
-                } else {              
+                } else {
                     word &= ~map[i][j];
                 }
                 continue;
@@ -52,7 +52,7 @@ int create_word(char display[3][3], int cursorx, int cursory) {
                     if ((index & slow_bit) && ((index & fast_bit) == fast_bit)) {
                         word &= ~map[i][j];
                     }
-                } else {              
+                } else {
                     if ((index & fast_bit) == fast_bit) {
                         word &= ~map[i][j];
                     }
@@ -87,8 +87,8 @@ void user_output(chanend from_strategy, chanend from_input) {
     while(1) {
         char display[3][3];
         int computer_starts;
-        int cursorx, cursory;    
-        
+        int cursorx, cursory;
+
         for(int i = 0; i < 3; i++) {
             for(int j = 0; j < 3; j++) {
                 display[i][j] = ' ';
@@ -97,10 +97,10 @@ void user_output(chanend from_strategy, chanend from_input) {
         from_strategy :> computer_starts;
         if (computer_starts) {
             cursorx = -1;      // Cursor off-board - computer's turn
-            cursory = -1;    
+            cursory = -1;
         } else {
             cursorx = 0;       // Cursor on-board - player's turn
-            cursory = 0;    
+            cursory = 0;
         }
         int finished = 0;
         while(!finished) {

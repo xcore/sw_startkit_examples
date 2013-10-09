@@ -7,9 +7,9 @@
 
 /*
  * the patterns for each bit are:
- *   0x80000 0x40000 0x20000 
- *   0x01000 0x00800 0x00400 
- *   0x00200 0x00100 0x00080 
+ *   0x80000 0x40000 0x20000
+ *   0x01000 0x00800 0x00400
+ *   0x00200 0x00100 0x00080
  *
  * As the leds go to 3V3, 0x00000 drives all 9 leds on, and 0xE1F80 drives
  * all nine leds off.
@@ -41,7 +41,7 @@ int main(void) {
     int delay = 1000/MODES;  // One full circle in 1000 PWM periods = 1 sec
     int led_counter = 0;     // A counter to count through the leds array
     int middle = 0;          // state of the middle led. Off initially
-    
+
     tmr :> now;              // Get the current time, this is maintained in now
     while(1) {
         int new_led_counter = led_counter+1;      // Next pattern

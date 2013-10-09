@@ -5,9 +5,9 @@
 
 /*
  * the patterns for each bit are:
- *   0x80000 0x40000 0x20000 
- *   0x01000 0x00800 0x00400 
- *   0x00200 0x00100 0x00080 
+ *   0x80000 0x40000 0x20000
+ *   0x01000 0x00800 0x00400
+ *   0x00200 0x00100 0x00080
  *
  * As the leds go to 3V3, 0x00000 drives all 9 leds on, and 0xE1F80 drives
  * all nine leds off.
@@ -57,7 +57,7 @@ void ball(chanend cx, chanend cy) {
     int x, z;
     timer tmr;           // Create a timer to time transistions
     int now;             // A variable to hold the current time
-    int delay = 1000000;  // 1 ms 
+    int delay = 1000000;  // 1 ms
     int sx = 1, sy = 1;
     int px = 1024, py = 0;
     tmr :> now;
