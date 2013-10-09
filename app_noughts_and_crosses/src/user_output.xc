@@ -18,14 +18,16 @@ void sleep(int x) {
     timer tmr;
     int t;
     tmr :> t;
-    t += x * 100000;
+    t += x * 200000;
     tmr when timerafter(t) :> void;
 }
+
+int p32_word = 0;
 
 int create_word(char display[3][3], int cursorx, int cursory) {
     static int index = 0;
     const int fast_bit = 7;
-    const int slow_bit = 128;
+    const int slow_bit = 32;
     static int press = 0;
     int word = 0xE1F80;
     int ok = 0;
@@ -67,12 +69,8 @@ int create_word(char display[3][3], int cursorx, int cursory) {
     }
     p32 :> button;
     p32 :> button;
-    p32 :> button;
-    p32 :> button;
-    p32 :> button;
-    p32 :> button;
-    p32 :> button;
-    p32 <: word;
+    p32_word = word;
+    p32 <: p32_word;
     if ((button & 1) == 0) {
         press++;
     } else {
@@ -120,15 +118,17 @@ void user_output(chanend from_strategy, chanend from_input) {
                     }
                 }
                 break;
-            case from_input :> x:
-                from_input :> y;
-                if (cursorx+x < 3 && cursorx+x >= 0) cursorx += x;
-                if (cursory+y < 3 && cursory+y >= 0) cursory += y;
-                break;
             default:
                 break;
             }
 //        printf("%d %d\n", cursorx, cursory);
+            p32 :> int _;
+            from_input <: 0;
+            from_input :> x;
+            from_input :> y;
+            p32 :> p32_word;
+            if (cursorx+x < 3 && cursorx+x >= 0) cursorx += x;
+            if (cursory+y < 3 && cursory+y >= 0) cursory += y;
             if (create_word(display, cursorx, cursory)) {
                 display[cursorx][cursory] = 'X';
                 from_strategy <: cursorx;
@@ -138,7 +138,7 @@ void user_output(chanend from_strategy, chanend from_input) {
             }
             sleep(1);
         }
-        for(int i = 0; i < 1000; i++) {
+        for(int i = 0; i < 300; i++) {
             create_word(display, -1, -1);
             sleep(1);
         }
