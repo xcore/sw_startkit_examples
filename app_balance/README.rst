@@ -1,6 +1,10 @@
 Balance the ball (LED)
 ======================
 
+:scope: Example
+:description: A demo of using the accelerometer slice
+:keywords: accelerometer, startKIT
+
 This program requires an accelerometer slice.
 
 It shows a ball (represented by a LED with some antialiasing) and when the

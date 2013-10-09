@@ -1,6 +1,11 @@
 The spinning bar
 ================
 
+:scope: Example
+:description: A simple demo using LEDs on the startKIT
+:keywords: LEDs, startKIT
+
+
 This is one of the simplest examples. It spins a sequence::
 
   | / - \

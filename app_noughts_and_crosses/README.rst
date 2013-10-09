@@ -1,6 +1,10 @@
 Noughts and crosses (tic-tac-toe)
 =================================
 
+:scope: Example
+:description: A noughts and crosses game for the startKIT
+:keywords: game, startKIT
+
 
 This is a program that plays noughts and crosses on a startKIT.
 The 3x3 display of LEDs shows the board status:

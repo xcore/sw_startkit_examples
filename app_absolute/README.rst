@@ -1,6 +1,10 @@
 Absolute position
 =================
 
+:scope: Example
+:description: A simple demo showing the use of slides and leds on startKIT.
+:keywords: capacitive, sensors, startKIT
+
 This program demonstrates that sliders can be used to read an (approximate)
 X and Y location. The position is highlighted by means of an (anti aliased)
 LED. moving a finger along either slider will move the LED along.

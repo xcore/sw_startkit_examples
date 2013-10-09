@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<xpd>
+    <components>
+        <component description = "A simple demo using LEDs on the startKIT" type = "demoCode" scope = "Example" path = "app_spinning_bar" local = "false" id = "app_spinning_bar" name = "The spinning bar">
+            <keyword>LEDs</keyword>
+            <keyword>startKIT</keyword>
+        </component>
+        <component description = "A noughts and crosses game for the startKIT" type = "demoCode" scope = "Example" path = "app_noughts_and_crosses" local = "false" id = "app_noughts_and_crosses" name = "Noughts and crosses (tic-tac-toe)">
+            <componentDependency>module_capacitive_sensing</componentDependency>
+            <keyword>game</keyword>
+            <keyword>startKIT</keyword>
+        </component>
+        <component description = "A LED demo for startKIT" type = "demoCode" scope = "Example" path = "app_spinning_dot" local = "false" id = "app_spinning_dot" name = "The spinning dot">
+            <keyword>LEDs</keyword>
+            <keyword>startKIT</keyword>
+        </component>
+        <component description = "A demo of using the accelerometer slice" type = "demoCode" scope = "Example" path = "app_balance" local = "false" id = "app_balance" name = "Balance the ball (LED)">
+            <componentDependency>module_i2c_master</componentDependency>
+            <keyword>accelerometer</keyword>
+            <keyword>startKIT</keyword>
+        </component>
+    </components>
+    <dependency repo = "sc_capacitive_sensing">
+        <githash>2b234badb673fe463640deca7d695ac333cf8c60</githash>
+        <uri>git@github.com:xcore/sc_capacitive_sensing</uri>
+    </dependency>
+    <description>startKIT example programs</description>
+    <location>git@github.com:xcore/sw_startkit_examples</location>
+    <name>sw_startkit_examples</name>
+    <vendor>XMOS</vendor>
+    <version_defines></version_defines>
+    <xcore_repo>sw_startkit_examples</xcore_repo>
+    <xpd_version>1.0</xpd_version>
+    <xsoftip_exclude>app_absolute</xsoftip_exclude>
+</xpd>

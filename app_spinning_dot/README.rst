@@ -1,6 +1,10 @@
 The spinning dot
 ================
 
+:scope: Example
+:description: A LED demo for startKIT
+:keywords: LEDs, startKIT
+
 This is a slightly more complex version of the spinning bar. Rather than
 spinning a bar a single dit is spun around the edge of the 3x3 square, but
 its movement is smoothed out by antialiasing. A LED will gradually be
