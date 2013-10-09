@@ -1,6 +1,7 @@
 #include <xs1.h>
 #include <stdio.h>
 #include <xscope.h>
+#include "absolute.h"
 
 /*
  * the patterns for each bit are:
@@ -56,38 +57,37 @@ void ball(chanend cx, chanend cy) {
     int x, z;
     timer tmr;           // Create a timer to time transistions
     int now;             // A variable to hold the current time
-    int delay = 100000;  // 1 ms 
+    int delay = 1000000;  // 1 ms 
     int sx = 1, sy = 1;
     int px = 1024, py = 0;
     tmr :> now;
+    cx <: 0; // Go!
     while(1) {
         int scale = 1000 * H;
-        select {
-        case cy :> z:
-          //  printf("%d %d %d\n", x, y, z);
-            int filteredz = filter(zvalues, z-1500);
-            if (filteredz < 0) {
-                sy = -1;
-                py = (-filteredz)*1024/scale;
-            } else {
-                sy = 1;
-                py = (filteredz)*1024/scale;
-            }
-            if (py > 1024) py = 1024;
-            break;
-        case cx :> x:
-            int filteredx = filter(xvalues, x-1500);
-            if (filteredx < 0) {
-                sx = -1;
-                px = (-filteredx)*1024/scale;
-            } else {
-                sx = 1;
-                px = (filteredx)*1024/scale;
-            }
-            if (px > 1024) px = 1024;
-            break;
-        default:
-            break;
+    cy :> z;
+        if (z != 0) {
+        //  printf("%d %d %d\n", x, y, z);
+        int filteredz = filter(zvalues, z-1500);
+        if (filteredz < 0) {
+            sy = -1;
+            py = (-filteredz)*1024/scale;
+        } else {
+            sy = 1;
+            py = (filteredz)*1024/scale;
+        }
+        if (py > 1024) py = 1024;
+        }
+    cx :> x;
+        if (x != 0) {
+        int filteredx = filter(xvalues, x-1500);
+        if (filteredx < 0) {
+            sx = -1;
+            px = (-filteredx)*1024/scale;
+        } else {
+            sx = 1;
+            px = (filteredx)*1024/scale;
+        }
+        if (px > 1024) px = 1024;
         }
         p32 <: leds[1][1];
         tmr when timerafter(now+=delay*(1024-px)/1024*(1024-py)/1024) :> void;
@@ -97,13 +97,11 @@ void ball(chanend cx, chanend cy) {
         tmr when timerafter(now+=delay*px/1024*(1024-py)/1024) :> void;
         p32 <: leds[1+sx][1+sy];
         tmr when timerafter(now+=delay*px/1024*py/1024) :> void;
+        p32 :> int _;
+        cx <: 0;
     }
 }
 
-
-#include <xs1.h>
-#include <stdio.h>
-#include "slider.h"
 
 clock clkx = XS1_CLKBLK_1;
 clock clky = XS1_CLKBLK_2;
@@ -112,9 +110,10 @@ port capy = XS1_PORT_4B;
 
 void user_input(chanend c, port cap, clock clk) {
     absolute_pos x;
-    absolute_slider_init(x, cap, clk, 4, 400, 200);
+    absolute_slider_init(x, cap, clk, 4, 100, 50);
     while(1) {
         int rx = absolute_slider(x, cap);
+        printf("\n");
         if (rx != 0) {
             c <: rx;
         }
@@ -123,17 +122,15 @@ void user_input(chanend c, port cap, clock clk) {
 
 void user_input_seq(chanend cx, chanend cy) {
     absolute_pos x, y;
-    absolute_slider_init(x, capx, clkx, 4, 1000, 150);
-    absolute_slider_init(y, capy, clky, 4, 1000, 150);
+    absolute_slider_init(x, capx, clkx, 4, 100, 50);
+    absolute_slider_init(y, capy, clky, 4, 100, 50);
     while(1) {
+        cx :> int _;
         int rx = absolute_slider(x, capx);
         int ry = absolute_slider(y, capy);
-        if (rx != 0) {
-            cx <: rx;
-        }
-        if (ry != 0) {
-            cy <: ry;
-        }
+        printf("\n");
+        cy <: ry;
+        cx <: rx;
     }
 }
 

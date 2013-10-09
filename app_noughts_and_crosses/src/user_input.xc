@@ -16,15 +16,13 @@ port capy = XS1_PORT_4B;
 
 void user_input(chanend to_output) {
     slider x, y;
-    slider_init(x, capx, clkx, 4, 1000, 150);
-    slider_init(y, capy, clky, 4, 1000, 150);
+    slider_init(x, capx, clkx, 4, 75, 40);
+    slider_init(y, capy, clky, 4, 75, 40);
     while(1) {
+        to_output :> int _;
         int rx = slider_filter(x, capx);
         int ry = slider_filter(y, capy);
-        if (rx == LEFTING || rx == RIGHTING ||
-            ry == LEFTING || ry == RIGHTING) {
-            to_output <: rx == LEFTING ? 1 : rx == RIGHTING ? -1 : 0;
-            to_output <: ry == LEFTING ? 1 : ry == RIGHTING ? -1 : 0;
-        }
+        to_output <: rx == LEFTING ? 1 : rx == RIGHTING ? -1 : 0;
+        to_output <: ry == LEFTING ? 1 : ry == RIGHTING ? -1 : 0;
     }
 }
