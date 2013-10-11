@@ -6,7 +6,7 @@
             <keyword>startKIT</keyword>
         </component>
         <component description = "A noughts and crosses game for the startKIT" type = "demoCode" scope = "Example" path = "app_noughts_and_crosses" local = "false" id = "app_noughts_and_crosses" name = "Noughts and crosses (tic-tac-toe)">
-            <componentDependency>module_capacitive_sensing</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
             <keyword>game</keyword>
             <keyword>startKIT</keyword>
         </component>
@@ -15,7 +15,7 @@
             <keyword>startKIT</keyword>
         </component>
         <component description = "A demo of using the accelerometer slice" type = "demoCode" scope = "Example" path = "app_balance" local = "false" id = "app_balance" name = "Balance the ball (LED)">
-            <componentDependency version = "2.1.0">module_i2c_master</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_i2c" version = "2.1.0">module_i2c_master</componentDependency>
             <keyword>accelerometer</keyword>
             <keyword>startKIT</keyword>
         </component>
@@ -35,7 +35,7 @@
     <partnumber>XM-004097-DH</partnumber>
     <release parenthash = "205664b65554b0adeec367a1f46c169064cba192" version = "1.0.0alpha0" githash = "5a83b0f2f08ce962dea65eb0ed8a86090117989c"></release>
     <release parenthash = "5a83b0f2f08ce962dea65eb0ed8a86090117989c" version = "1.0.0alpha1" githash = "f2e0a7fa5bd5d53e1df4bb9fe0291c30471278d0"></release>
-    <release parenthash = "f2e0a7fa5bd5d53e1df4bb9fe0291c30471278d0" version = "1.0.0alpha2"></release>
+    <release parenthash = "f2e0a7fa5bd5d53e1df4bb9fe0291c30471278d0" version = "1.0.0alpha2" githash = "329e781ce64313cfe909c4320535d5afd27e95ed"></release>
     <subpartnumber>XM-004098-SM</subpartnumber>
     <vendor>XMOS</vendor>
     <version_defines></version_defines>
