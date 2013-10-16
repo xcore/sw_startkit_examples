@@ -11,49 +11,42 @@
  */
 
 #include "i2c.h"
-
+#include "ball.h"
 #include <xs1.h>
 #include <print.h>
 #include <xscope.h>
-
-r_i2c i2c = { XS1_PORT_1K, XS1_PORT_1I, 250 };
+#include "debug_print.h"
 
 /** Function that reads out an acceleration; out of two registers and makes
  * it two's complements.
  */
-int read_acceleration(int reg) {
-    int r;
-    unsigned char data[1];
-    i2c_master_read_reg(0x1D, reg, data, 1, i2c);
-    r = data[0] << 2;
-    i2c_master_read_reg(0x1D, reg+1, data, 1, i2c);
-    r |= (data[0] >> 6);
-    if(r & 0x200) {
-        r -= 1023;
-    }
-    return r;
+int read_acceleration(client i2c_master_if i2c, int reg) {
+  int r;
+  r = i2c.read_reg(0x1D, reg) << 2;
+  r |= i2c.read_reg(0x1D, reg + 1) >> 6;
+  if(r & 0x200) {
+    r -= 1023;
+  }
+  return r;
 }
 
 /** Function that reads acceleration in 3 dimensions and outputs them onto a channel end
  */
-void accelerometer(chanend c) {
-    unsigned char data[1];
+void accelerometer(client ball_if ball, client i2c_master_if i2c) {
+  // Set up dividers
+  i2c.write_reg(0x1D, 0x0E, 0x01);
+  i2c.write_reg(0x1D, 0x2A, 0x01);
+  while(1) {
+    unsigned char data;
+    do {
+      data = i2c.read_reg(0x1D, 0x00);
+    } while (!data & 0x08);
     int x, y, z;
-    i2c_master_init(i2c);
+    x = read_acceleration(i2c, 1);
+    y = read_acceleration(i2c, 3);
+    z = read_acceleration(i2c, 5);
 
-    data[0] = 0x01;                                 // Set up dividers
-    i2c_master_write_reg(0x1D, 0x0E, data, 1, i2c);
-    data[0] = 0x01;
-    i2c_master_write_reg(0x1D, 0x2A, data, 1, i2c);
-    while(1) {
-        do {
-            i2c_master_read_reg(0x1D, 0x00, data, 1, i2c);
-        } while(!(data[0] & 0x08));
-        x = read_acceleration(1);
-        y = read_acceleration(3);
-        z = read_acceleration(5);
-        c <: x;
-        c <: y;
-        c <: z;
-    }
+    // Once the position is read use it to set the ball position
+    ball.new_position(x, y, z);
+  }
 }

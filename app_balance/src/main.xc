@@ -5,131 +5,133 @@
 
 #include <xs1.h>
 #include <stdio.h>
+#include <print.h>
+#include <stdlib.h>
+#include <xclib.h>
+#include <platform.h>
+#include "ball.h"
+#include "i2c.h"
+#include "startkit_gpio.h"
 
-extern void accelerometer(chanend c);
+extern void accelerometer(client ball_if, client i2c_master_if);
 
-/*
- * the patterns for each bit are:
- *   0x80000 0x40000 0x20000
- *   0x01000 0x00800 0x00400
- *   0x00200 0x00100 0x00080
- *
- * As the leds go to 3V3, 0x00000 drives all 9 leds on, and 0xE1F80 drives
- * all nine leds off.
- * The four patterns below drive a dash, backslash, pipe, and slash.
- */
-
-int leds[3][3] = {
-    { 0x71F80, 0xA1F80, 0xC1F80 },
-    { 0xE0F80, 0xE1780, 0xE1B80 },
-    { 0xE1D80, 0xE1E80, 0xE1F00 },
-};
-
-/* This the port where the leds reside */
-port p32 = XS1_PORT_32A;
-
-/* This section of code filters and averages values */
-
-#define H 32
+#define HISTORY_LEN 32
 
 struct history {
-    int values[H];     // A filter that holds 32 old values
-    int w;             // index of the oldest value in the array
-    int av;            // Running average of all values
+  int values[HISTORY_LEN];     // A filter that holds 32 old values
+  int w;             // index of the oldest value in the array
+  int av;            // Running average of all struct
 };
 
-/** This function initialises the running average. It sets all old values
- * to zero, the running average to 0 (the sum of all values), and it sets
- * the 2 index to some legal value (0).
- */
-void filter_init(struct history &h) {
+static int filter(struct history &h, int value) {
+  h.av += value;
+  h.av -= h.values[h.w];
+  h.values[h.w] = value;
+  h.w++;
+  if (h.w == HISTORY_LEN) {
     h.w = 0;
-    h.av = 0;
-    for(int i = 0; i < H; i++) {
-        h.values[i] = 0;
-    }
+  }
+  return h.av/HISTORY_LEN;
 }
 
-/** This function adds a sample to the history, and computes a new average.
- * The running average is adapted by subtracting the oldest value, and
- * adding in the new value. The new value is then stored, and the sum is
- * returned
- */
-int filter(struct history &h, int value) {
-    h.av += value;
-    h.av -= h.values[h.w];
-    h.values[h.w] = value;
-    h.w++;
-    if (h.w == H) {
-        h.w = 0;
+// This is the range of the ball, i.e. the x,y,z coordinates will
+// be between -BALL_RANGE and +BALL_RANGE
+#define BALL_RANGE 50
+
+[[combinable]]
+void ball(server ball_if ball, client startkit_led_if leds) {
+  struct history history_x, history_y, history_z;
+  history_x.w = history_y.w = history_z.w = 0;
+  history_x.av = history_y.av = history_z.av = 0;
+
+  for(int i = 0; i < HISTORY_LEN; i++) {
+    history_x.values[i] = history_y.values[i] = history_z.values[i] = 0;
+  }
+
+  while(1) {
+    select {
+    case ball.new_position(int new_x, int new_y, int new_z):
+      int x, y, z;
+
+      // Average the ball position over recent history
+      x = filter(history_x, new_x);
+      y = filter(history_y, new_y);
+      z = filter(history_z, new_z);
+
+      // Split the position into sign and magnitude
+      // where the magnitude is between 0..LED_ON
+      int sx = x < 0 ? -1 : 1;
+      int sz = z < 0 ? -1 : 1;
+      unsigned px, pz;
+
+      px = abs(x);                             // take absolute value
+      px = px > BALL_RANGE ? BALL_RANGE : px;  // clip at BALL_RANGE
+      px = px * LED_ON/BALL_RANGE;             // scale to LED_ON
+
+      pz = abs(z);
+      pz = pz > BALL_RANGE ? BALL_RANGE : pz;
+      pz = pz * LED_ON/BALL_RANGE;
+
+      // Clear all led levels
+      leds.set_multiple(0b111111111, 0);
+
+      // Set the leds to show the ball position
+      leds.set(1,      1,      (LED_ON - px) * (LED_ON - pz) / LED_ON);
+      leds.set(1,      1 + sz, (LED_ON - px) * pz / LED_ON);
+      leds.set(1 + sx, 1,      (px * (LED_ON - pz)) / LED_ON);
+      leds.set(1 + sx, 1 + sz, (px * pz) / LED_ON);
+      break;
     }
-    return h.av;
+  }
 }
 
-#define FULL_SCALE  1024
+/* The ports for the I2C interface to the accelerometer */
+port p_scl = XS1_PORT_1K;
+port p_sda = XS1_PORT_1I;
 
-/** This function takes a number and splits it into a sign (-1, 1) and a
- * value between 0 and FULL_SCALE to identify the fraction. The input value
- * is in the range -10..10, is then filtered (which produces a sum of H
- * values, hence a factor H higher), the filtered value is hence divided by
- * 10 * H after being divided by the full scale.
- */
-void split(int value, struct history &h, int &sign, int &partial) {
-    int scale = 10 * H;
-    int filtered = filter(h, value);
-    if (filtered < 0) {
-        sign = -1;
-        partial = (-filtered)*FULL_SCALE/scale;
-    } else {
-        sign = 1;
-        partial = (filtered)*FULL_SCALE/scale;
-    }
-    if (partial > FULL_SCALE) {
-        partial = FULL_SCALE;
-    }
-}
-
-void ball(chanend c) {
-    struct history zvalues, xvalues;
-    filter_init(xvalues);
-    filter_init(zvalues);
-    int x, y, z;
-    timer tmr;           // Create a timer to time transistions
-    int now;             // A variable to hold the current time
-    int delay = 100000;  // 1 ms
-    int sx = 1, sy = 1;  // sign: -1 or 1, ball is either left or right of centre
-    int px = 0, py = 0;  // partial: 0..FULL_SCALE: 0 means centre, FULL_SCALE means edge
-    tmr :> now;          // Initialise current time
-    while(1) {
-        select {
-        case c :> x:     // If the accelerometer has a new X/Y/Z value
-            c :> y;
-            c :> z;
-            split(z, zvalues, sy, py);  // split them into a sign and partial value
-            split(x, xvalues, sx, px);  // for both X and Y
-            break;
-        default:                        // otherwise continue to modulate the LEDs
-            break;
-        }
-        p32 <: leds[1][1];              // Drive center led for 1-px * 1-py fraction of time
-        now += delay * (FULL_SCALE-px)/FULL_SCALE * (FULL_SCALE-py)/FULL_SCALE;
-        tmr when timerafter(now) :> void;
-        p32 <: leds[1][1+sy];           // Drive led 1 down/up for 1-px * py fraction
-        now += delay * (FULL_SCALE-px)/FULL_SCALE * py/FULL_SCALE;
-        tmr when timerafter(now) :> void;
-        p32 <: leds[1+sx][1];           // Drive led 1 right/keft for px * 1-py fraction
-        now += delay * px/FULL_SCALE * (FULL_SCALE-py)/FULL_SCALE;
-        tmr when timerafter(now) :> void;
-        p32 <: leds[1+sx][1+sy];        // Drive led on diagoanl for px * py fraction
-        now += delay * px/FULL_SCALE * py/FULL_SCALE;
-        tmr when timerafter(now) :> void;
-    }
-}
+/* The ports for leds/button/capsense */
+startkit_gpio_ports gpio_ports =
+  {XS1_PORT_32A, XS1_PORT_4A, XS1_PORT_4B, XS1_CLKBLK_1};
 
 int main(void) {
-    chan c;
-    par {
-        ball(c);
-        accelerometer(c);
-    }
+  // These interfaces connect the tasks below together
+  ball_if i_ball;
+  i2c_master_if i_i2c[1];     // these are arrays since the driver
+                              // components accept multiple clients
+  startkit_led_if i_led;
+
+  //  This is what the task diagram of the application is like:
+  //
+  //  i2c_master <-- accelerometer
+  //                      |
+  //                      V
+  //                     ball  --> startkit_gpio_driver
+
+  //  The ball and startkit_gpio_driver tasks run on the same logical
+  //  core (using co-operative multitasking).
+  //
+  //  The i2c_master tasks is "distributable" and connected to the
+  //  accelerometer task on the same tile so does not take up a logical
+  //  core of its own.
+  //
+  //  Altogether the application takes up 2 logical cores.
+
+  par {
+    // A driver task for the i2c ports
+    on tile[0]: i2c_master(i_i2c, 1, p_scl, p_sda);
+
+    // This task periodically reads the position from the
+    // accelerometer slice and feeds it to the ball task
+    on tile[0]: accelerometer(i_ball, i_i2c[0]);
+
+    // This task reads the ball position from the accelerometer task
+    // when there is a change and updates the LED values based on
+    // that position
+    on tile[0].core[0]: ball(i_ball, i_led);
+
+    // The led driver task
+    on tile[0].core[0]: startkit_gpio_driver(i_led, null, null, null,
+                                             gpio_ports);
+  }
+  return 0;
 }

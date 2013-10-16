@@ -1,0 +1,1 @@
+#define I2C_BIT_TIME 250
