@@ -1,4 +1,4 @@
-TARGET = XK-1A
+TARGET = STARTKIT
 APP_NAME =
 XCC_FLAGS = -g -report -save-temps -O1
 USED_MODULES = module_i2c module_startkit_gpio module_logging
