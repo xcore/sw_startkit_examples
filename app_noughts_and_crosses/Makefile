@@ -1,7 +1,7 @@
 TARGET = STARTKIT
 APP_NAME =
-XCC_FLAGS = -lxscope -fxscope
-USED_MODULES = module_capacitive_sensing
+XCC_FLAGS = -g -report -Os -save-temps -fno-xta-info
+USED_MODULES = module_xassert module_logging module_startkit_gpio
 
 #=============================================================================
 # The following part of the Makefile includes the common build infrastructure
