@@ -156,14 +156,12 @@
 								<option id = "com.xmos.xc.compiler.option.include.paths.81887811" name="com.xmos.xc.compiler.option.include.paths" superClass="com.xmos.xc.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/.settings}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_capacitive_sensing/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_capacitive_sensing}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_logging/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_logging}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio/.settings}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_xassert/src}&quot;' />
@@ -279,14 +277,12 @@
 								<option id = "com.xmos.c.compiler.option.include.paths.79138391" name="com.xmos.c.compiler.option.include.paths" superClass="com.xmos.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/.settings}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_capacitive_sensing/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_capacitive_sensing}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_logging/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_logging}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio/.settings}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_xassert/src}&quot;' />
@@ -408,14 +404,12 @@
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/.settings}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/app_noughts_and_crosses}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_capacitive_sensing/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_capacitive_sensing}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_logging/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_logging}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio/.settings}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio/src}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_startkit_gpio}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_xassert/src}&quot;' />

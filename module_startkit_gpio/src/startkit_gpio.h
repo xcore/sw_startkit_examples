@@ -11,7 +11,7 @@
    LED_OFF = 0x0,
    LED_ON  = 0xFFFF
  };
- 
+
  /** Interface for controlling leds on the startkit.
   */
  typedef interface startkit_led_if  {
@@ -20,7 +20,7 @@
     *  Use this function to set a single led in the range LED_OFF .. LED_ON
     */
    void set(unsigned row, unsigned col, unsigned val);
- 
+
    /** Set multiple led values.
     *
     *  Use this function to set the level of several leds at once.
@@ -35,15 +35,15 @@
     *  If the bit is not set then the led is set to LED_OFF.
     */
    void set_multiple(unsigned mask, unsigned val);
- 
+
  } startkit_led_if;
- 
+
  /** Enum for representing button state */
  typedef enum button_val {
    BUTTON_UP,
    BUTTON_DOWN
  } button_val_t;
- 
+
  /** Interface for interacting with buttons */
  typedef interface startkit_button_if {
    /** This notification occurs when the button changes state (i.e. goes
@@ -60,16 +60,16 @@
     *
     */
    [[notification]] slave void changed();
- 
+
    /** Get the current value of the button.
     *
     *  This returns either BUTTON_UP or BUTTON_DOWN.
     */
    [[clears_notification]] button_val_t get_value();
- 
+
  } startkit_button_if;
- 
- 
+
+
  /* Simple LED driver
   *
   * This task will drive leds according to commands received via the
@@ -95,7 +95,7 @@ typedef struct startkit_gpio_ports
   clock clk;  // clock for capsense (if capsense required)
 } startkit_gpio_ports;
 
- 
+
  /** startKIT gpio driver.
   *
   *  This task drives pwm output on the leds to varying brightness and
@@ -117,7 +117,7 @@ typedef struct startkit_gpio_ports
                            server slider_if ?i_slider_x,
                            server slider_if ?i_slider_y,
                            startkit_gpio_ports &ps);
- 
- 
- 
+
+
+
  #endif // _startkit_gpio_h_
