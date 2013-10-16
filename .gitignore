@@ -1,10 +1,7 @@
-app_noughts_and_crosses/.build
-app_noughts_and_crosses/bin
-app_absolute/.build
-app_absolute/bin
-app_balance/.build
-app_balance/bin
-app_spinning_bar/.build
-app_spinning_bar/bin
-app_spinning_dot/.build
-app_spinning_dot/bin
+*/.build
+*/bin
+*/.settings
+*.xmt
+*.log
+*.zip
+*.xe
