@@ -28,6 +28,11 @@
         <githash>a72c5d2a55825aac5d1e15d60b367cdd08a827bb</githash>
         <uri>git@github.com:xcore/sc_i2c</uri>
     </dependency>
+    <dependency repo = "sc_util">
+        <githash>d0531d7c68ab67334582c324828e36d617baf8b3</githash>
+        <uri>git@github.com:xcore/sc_util</uri>
+        <version>1.0.3rc0</version>
+    </dependency>
     <description>startKIT example programs</description>
     <location>git@github.com:xcore/sw_startkit_examples</location>
     <name>sw_startkit_examples</name>
@@ -37,7 +42,7 @@
     <release parenthash = "5a83b0f2f08ce962dea65eb0ed8a86090117989c" version = "1.0.0alpha1" githash = "f2e0a7fa5bd5d53e1df4bb9fe0291c30471278d0"></release>
     <release parenthash = "f2e0a7fa5bd5d53e1df4bb9fe0291c30471278d0" version = "1.0.0alpha2" githash = "329e781ce64313cfe909c4320535d5afd27e95ed"></release>
     <release parenthash = "67ae0c9f62570a60275604eb69e9676adba2ebbb" version = "1.0.0alpha3" githash = "4f79a43044d16654967b9d1d87cf07cd326f3e23"></release>
-    <release parenthash = "41623bc38f7467a00ed3be94acc82f199cb897a6" version = "1.0.0alpha4"></release>
+    <release parenthash = "41623bc38f7467a00ed3be94acc82f199cb897a6" version = "1.0.0alpha4" githash = "0c3ef19488f33b3273edd269122ae116437adbe0"></release>
     <subpartnumber>XM-004098-SM</subpartnumber>
     <vendor>XMOS</vendor>
     <version_defines></version_defines>
