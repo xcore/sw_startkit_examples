@@ -1,0 +1,4 @@
+<xSCOPEconfig enabled="true" ioMode="basic">
+  <Probe name="probex" type="CONTINUOUS" datatype="INT" units=""/>
+  <Probe name="probey" type="CONTINUOUS" datatype="INT" units=""/>
+</xSCOPEconfig>

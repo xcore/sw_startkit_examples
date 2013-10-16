@@ -1,150 +1,135 @@
 #include <xs1.h>
 #include <stdio.h>
 #include <xscope.h>
-#include "absolute.h"
+#include "startkit_gpio.h"
+#include <stdlib.h>
+#include <platform.h>
+#include <print.h>
+#include <xscope.h>
 
-/*
- * the patterns for each bit are:
- *   0x80000 0x40000 0x20000
- *   0x01000 0x00800 0x00400
- *   0x00200 0x00100 0x00080
- *
- * As the leds go to 3V3, 0x00000 drives all 9 leds on, and 0xE1F80 drives
- * all nine leds off.
- * The four patterns below drive a dash, backslash, pipe, and slash.
- */
+typedef interface ball_if {
+  void  new_position(int x, int y, int z);
+} ball_if;
 
-int leds[3][3] = {
-    { 0x71F80, 0xA1F80, 0xC1F80 },
-    { 0xE0F80, 0xE1780, 0xE1B80 },
-    { 0xE1D80, 0xE1E80, 0xE1F00 },
-};
 
-/* This the port where the leds reside */
-port p32 = XS1_PORT_32A;
-
-#define H 4
+#define HISTORY_LEN 32
 
 struct history {
-    int values[H];
-    int w;
-    int av;
+  int values[HISTORY_LEN];     // A filter that holds 32 old values
+  int w;             // index of the oldest value in the array
+  int av;            // Running average of all struct
 };
 
-void filter_init(struct history &h) {
+static int filter(struct history &h, int value) {
+  h.av += value;
+  h.av -= h.values[h.w];
+  h.values[h.w] = value;
+  h.w++;
+  if (h.w == HISTORY_LEN) {
     h.w = 0;
-    h.av = 0;
-    for(int i = 0; i < H; i++) {
-        h.values[i] = 0;
+  }
+  return h.av/HISTORY_LEN;
+}
+
+
+// This is the range of the ball, i.e. the x,y,z coordinates will
+// be between -BALL_RANGE and +BALL_RANGE
+#define BALL_RANGE 700
+
+[[combinable]]
+void ball(server ball_if ball, client startkit_led_if leds) {
+  struct history history_x, history_y, history_z;
+  history_x.w = history_y.w = history_z.w = 0;
+  history_x.av = history_y.av = history_z.av = 0;
+
+  for(int i = 0; i < HISTORY_LEN; i++) {
+    history_x.values[i] = history_y.values[i] = history_z.values[i] = 0;
+  }
+
+  while(1) {
+    select {
+    case ball.new_position(int new_x, int new_y, int new_z):
+      int x, y, z;
+
+      // Average the ball position over recent history
+      x = filter(history_x, new_x);
+      y = filter(history_y, new_y);
+      z = filter(history_z, new_z);
+
+      // Split the position into sign and magnitude
+      // where the magnitude is between 0..LED_ON
+      int sx = x < 0 ? -1 : 1;
+      int sy = y < 0 ? -1 : 1;
+      unsigned px, py;
+      px = abs(x);
+      px = px > BALL_RANGE ? BALL_RANGE : px;
+      px = px * LED_ON/BALL_RANGE;
+
+      py = abs(y);
+      py = py > BALL_RANGE ? BALL_RANGE : py;
+      py = py * LED_ON/BALL_RANGE;
+
+      // Clear all led levels
+      leds.set_multiple(0b111111111, 0);
+
+      // Set the leds to show the ball position
+      leds.set(1,      1,      (LED_ON - px) * (LED_ON - py) / LED_ON);
+      leds.set(1,      1 + sy, (LED_ON - px) * py / LED_ON);
+      leds.set(1 + sx, 1,      (px * (LED_ON - py)) / LED_ON);
+      leds.set(1 + sx, 1 + sy, (px * py) / LED_ON);
+      break;
     }
+  }
 }
 
-int filter(struct history &h, int value) {
-    h.av += value;
-    h.av -= h.values[h.w];
-    h.values[h.w] = value;
-    h.w++;
-    if (h.w == H) {
-        h.w = 0;
+[[combinable]]
+void drive_ball(client slider_if i_slider_x,
+                client slider_if i_slider_y,
+                client ball_if   i_ball)
+{
+  timer tmr;
+  int t;
+  int poll_period = 100000;
+  tmr :> t;
+  while (1) {
+    select {
+    case tmr when timerafter(t + poll_period) :> t:
+      int x = i_slider_x.get_coord();
+      int y = i_slider_y.get_coord();
+      // Capsense returns in range 0..3000, adjust so 0 is centre
+      x -= 1500;
+      y -= 1500;
+      xscope_int(PROBEX, x);
+      xscope_int(PROBEY, y);
+      i_ball.new_position(x, y, 0);
+      t += poll_period;
+      break;
     }
-    return h.av;
+  }
 }
 
-void ball(chanend cx, chanend cy) {
-    struct history zvalues, xvalues;
-    filter_init(xvalues);
-    filter_init(zvalues);
-    int x, z;
-    timer tmr;           // Create a timer to time transistions
-    int now;             // A variable to hold the current time
-    int delay = 1000000;  // 1 ms
-    int sx = 1, sy = 1;
-    int px = 1024, py = 0;
-    tmr :> now;
-    cx <: 0; // Go!
-    while(1) {
-        int scale = 1000 * H;
-    cy :> z;
-        if (z != 0) {
-        //  printf("%d %d %d\n", x, y, z);
-        int filteredz = filter(zvalues, z-1500);
-        if (filteredz < 0) {
-            sy = -1;
-            py = (-filteredz)*1024/scale;
-        } else {
-            sy = 1;
-            py = (filteredz)*1024/scale;
-        }
-        if (py > 1024) py = 1024;
-        }
-    cx :> x;
-        if (x != 0) {
-        int filteredx = filter(xvalues, x-1500);
-        if (filteredx < 0) {
-            sx = -1;
-            px = (-filteredx)*1024/scale;
-        } else {
-            sx = 1;
-            px = (filteredx)*1024/scale;
-        }
-        if (px > 1024) px = 1024;
-        }
-        p32 <: leds[1][1];
-        tmr when timerafter(now+=delay*(1024-px)/1024*(1024-py)/1024) :> void;
-        p32 <: leds[1][1+sy];
-        tmr when timerafter(now+=delay*(1024-px)/1024*py/1024) :> void;
-        p32 <: leds[1+sx][1];
-        tmr when timerafter(now+=delay*px/1024*(1024-py)/1024) :> void;
-        p32 <: leds[1+sx][1+sy];
-        tmr when timerafter(now+=delay*px/1024*py/1024) :> void;
-        p32 :> int _;
-        cx <: 0;
-    }
-}
-
-
-clock clkx = XS1_CLKBLK_1;
-clock clky = XS1_CLKBLK_2;
-port capx = XS1_PORT_4A;
-port capy = XS1_PORT_4B;
-
-void user_input(chanend c, port cap, clock clk) {
-    absolute_pos x;
-    absolute_slider_init(x, cap, clk, 4, 100, 50);
-    while(1) {
-        int rx = absolute_slider(x, cap);
-        printf("\n");
-        if (rx != 0) {
-            c <: rx;
-        }
-    }
-}
-
-void user_input_seq(chanend cx, chanend cy) {
-    absolute_pos x, y;
-    absolute_slider_init(x, capx, clkx, 4, 100, 50);
-    absolute_slider_init(y, capy, clky, 4, 100, 50);
-    while(1) {
-        cx :> int _;
-        int rx = absolute_slider(x, capx);
-        int ry = absolute_slider(y, capy);
-        printf("\n");
-        cy <: ry;
-        cx <: rx;
-    }
-}
-
-void xscope_user_init(void) {
-    xscope_config_io(XSCOPE_IO_BASIC);
-}
-
+/* This the port where the leds reside */
+startkit_gpio_ports gpio_ports =
+  {XS1_PORT_32A, XS1_PORT_4A, XS1_PORT_4B, XS1_CLKBLK_1};
 
 int main(void) {
-    chan x, y;
-    par {
-        ball(x, y);
-        user_input_seq(x, y);
-//        user_input(x, capx, clkx);
-//        user_input(y, capy, clky);
-    }
+  // These interfaces connect the tasks below together
+  ball_if i_ball;
+  startkit_led_if i_led;
+  slider_if i_slider_x, i_slider_y;
+  par {
+    on tile[0].core[0]: drive_ball(i_slider_x, i_slider_y, i_ball);
+
+    // This task reads the ball position from the accelerometer task
+    // when there is a change and updates the LED values based on
+    // that position
+    on tile[0].core[1]: ball(i_ball, i_led);
+
+    // The led driver task
+    on tile[0].core[2]: startkit_gpio_driver(i_led, null,
+                                             i_slider_x, i_slider_y,
+                                             gpio_ports);
+  }
+  return 0;
 }
+
