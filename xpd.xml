@@ -6,16 +6,38 @@
             <keyword>startKIT</keyword>
         </component>
         <component description = "A noughts and crosses game for the startKIT" type = "demoCode" scope = "Example" path = "app_noughts_and_crosses" local = "false" id = "app_noughts_and_crosses" name = "Noughts and crosses (tic-tac-toe)">
-            <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_logging</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_xassert</componentDependency>
+            <componentDependency repo = "git://github.com/davelxmos/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <componentDependency version = "1.0.0">module_startkit_gpio</componentDependency>
             <keyword>game</keyword>
             <keyword>startKIT</keyword>
+        </component>
+        <component description = "A module for driving the LEDS, button and capsense on
+startKIT boards" type = "demoCode" scope = "Example" path = "module_startkit_gpio" local = "false" id = "module_startkit_gpio" name = "GPIO Driver for startKIT">
+            <componentDependency repo = "git://github.com/davelxmos/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <keyword>startKIT</keyword>
+            <keyword>leds</keyword>
+            <keyword>capacitive</keyword>
+            <keyword>buttons</keyword>
         </component>
         <component description = "A LED demo for startKIT" type = "demoCode" scope = "Example" path = "app_spinning_dot" local = "false" id = "app_spinning_dot" name = "The spinning dot">
             <keyword>LEDs</keyword>
             <keyword>startKIT</keyword>
         </component>
+        <component description = "A simple demo using LED and PWM on the startKIT" type = "demoCode" scope = "Example" path = "app_glowing_leds" local = "false" id = "app_glowing_leds" name = "Glowing LED pattern">
+            <componentDependency version = "1.0.0">module_startkit_gpio</componentDependency>
+            <componentDependency repo = "git://github.com/davelxmos/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <keyword>LEDs</keyword>
+            <keyword>startKIT</keyword>
+            <keyword>buttons</keyword>
+        </component>
         <component description = "A demo of using the accelerometer slice" type = "demoCode" scope = "Example" path = "app_balance" local = "false" id = "app_balance" name = "Balance the ball (LED)">
-            <componentDependency repo = "git://github.com/xcore/sc_i2c" version = "2.1.0">module_i2c_master</componentDependency>
+            <componentDependency repo = "git://github.com/davelxmos/sc_i2c" version = "2.2.0">module_i2c</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_logging</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_xassert</componentDependency>
+            <componentDependency repo = "git://github.com/davelxmos/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <componentDependency version = "1.0.0">module_startkit_gpio</componentDependency>
             <keyword>accelerometer</keyword>
             <keyword>startKIT</keyword>
         </component>
@@ -47,7 +69,7 @@
     <vendor>XMOS</vendor>
     <version_defines></version_defines>
     <xcore_partnumber>XM-004097-DH</xcore_partnumber>
-    <xcore_repo>git://github.com/xcore/sw_startkit_examples</xcore_repo>
+    <xcore_repo>git://github.com/davelxmos/sw_startkit_examples</xcore_repo>
     <xcore_subpartnumber>XM-004098-SM</xcore_subpartnumber>
     <xpd_version>1.0</xpd_version>
     <xsoftip_exclude>app_absolute</xsoftip_exclude>
