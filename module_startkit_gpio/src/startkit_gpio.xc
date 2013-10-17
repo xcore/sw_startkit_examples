@@ -71,7 +71,7 @@ void startkit_led_driver(server startkit_led_if c_led[n], unsigned n, port p32)
                                client slider_query_if sy)
  {
   unsigned button_val = BUTTON_DOWN;
-  const int pwm_cycle = 1000000;   // The period in 100Mhz timer ticks of the
+  const int pwm_cycle = 100000;   // The period in 100Mhz timer ticks of the
                                   // pwm
   const int pwm_res = 100;        // The resolution of the pwm
   const int delay = pwm_cycle / pwm_res; // The period between updates
@@ -82,7 +82,7 @@ void startkit_led_driver(server startkit_led_if c_led[n], unsigned n, port p32)
   int level[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
 
   sliderstate xstate = IDLE, ystate = IDLE;
-  int capsense_period = 1000000; // 1ms
+  int capsense_period = 500000;
   int capsense_time;
   timer tmr;
   int poll_x_or_y = 0;
@@ -92,7 +92,7 @@ void startkit_led_driver(server startkit_led_if c_led[n], unsigned n, port p32)
   while (1) {
     select {
     // A periodic event that occurs event 'delay' ticks.
-    case tmr when timerafter(time) :> time:
+    case tmr when timerafter(time) :> void:
       count++;
       if (count == pwm_res) {
         unsigned data;
@@ -109,27 +109,25 @@ void startkit_led_driver(server startkit_led_if c_led[n], unsigned n, port p32)
             button_val = new_val;
           }
         }
-        if (timeafter(time, capsense_time)) {
-          if (poll_x_or_y) {
-            if (!isnull(i_slider_x)) {
-              sliderstate new_state = sx.filter();
-              if (new_state != xstate) {
-                xstate = new_state;
-                i_slider_x.changed_state();
-              }
-            }
-          } else {
-            if (!isnull(i_slider_y)) {
-              sliderstate new_state = sy.filter();
-              if (new_state != ystate) {
-                ystate = new_state;
-                i_slider_y.changed_state();
-              }
+        if (poll_x_or_y) {
+          if (!isnull(i_slider_x)) {
+            sliderstate new_state = sx.filter();
+            if (new_state != xstate) {
+              xstate = new_state;
+              i_slider_x.changed_state();
             }
           }
-          poll_x_or_y = ~poll_x_or_y;
-          capsense_time += capsense_period;
+        } else {
+          if (!isnull(i_slider_y)) {
+            sliderstate new_state = sy.filter();
+            if (new_state != ystate) {
+              ystate = new_state;
+              i_slider_y.changed_state();
+            }
+          }
         }
+        poll_x_or_y = ~poll_x_or_y;
+        capsense_time += capsense_period;
         count = 0;
       }
       // Create the output for this phase in the pwm
@@ -146,6 +144,7 @@ void startkit_led_driver(server startkit_led_if c_led[n], unsigned n, port p32)
       // Output the combined led data
       p32 <: data;
       // Set up the next event
+      tmr :> time;
       time += delay;
       break;
 
