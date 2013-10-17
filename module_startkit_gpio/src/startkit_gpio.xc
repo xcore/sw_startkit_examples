@@ -89,6 +89,8 @@ void startkit_led_driver(server startkit_led_if c_led[n], unsigned n, port p32)
   int time;   // This variable always stores the time of the next pwm event
   tmr :> time;
   capsense_time = time + capsense_period;
+  int button_debounce_max_count = 50;
+  int button_debounce_count = button_debounce_max_count;
   while (1) {
     select {
     // A periodic event that occurs event 'delay' ticks.
@@ -96,17 +98,27 @@ void startkit_led_driver(server startkit_led_if c_led[n], unsigned n, port p32)
       count++;
       if (count == pwm_res) {
         unsigned data;
+        unsigned pt;
+        p32 :> data;
+        tmr :> pt;
+        tmr when timerafter(pt + 10) :> void;
         p32 :> data;
         if (!isnull(i_button)) {
-          // At the end of each pwm cycle, sample the button
-          // by turning the output port into an input port
-          // Look at the bottom bit of the port
-          button_val_t new_val = (data & 1) ? BUTTON_UP : BUTTON_DOWN;
-          // If the value has changed, call the changed() notification
-          // to tell the client
-          if (new_val != button_val) {
-            i_button.changed();
-            button_val = new_val;
+          if (button_debounce_count >= button_debounce_max_count) {
+            // At the end of each pwm cycle, sample the button
+            // by turning the output port into an input port
+            // Look at the bottom bit of the port
+            button_val_t new_val = (data & 1) ? BUTTON_UP : BUTTON_DOWN;
+            // If the value has changed, call the changed() notification
+            // to tell the client
+            if (new_val != button_val) {
+              i_button.changed();
+              button_val = new_val;
+              button_debounce_count = 0;
+            }
+          }
+          else {
+            button_debounce_count++;
           }
         }
         if (poll_x_or_y) {
