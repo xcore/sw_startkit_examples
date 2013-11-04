@@ -1,7 +1,7 @@
 startKIT developer board examples
 =================================
 
-:Latest release: 1.0.0alpha5
+:Latest release: 1.0.0alpha6
 :Maintainer: davelxmos
 :Description: startKIT example programs
 
