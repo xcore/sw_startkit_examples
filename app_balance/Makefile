@@ -1,7 +1,7 @@
 TARGET = STARTKIT
 APP_NAME =
 XCC_FLAGS = -g -report -save-temps -O1
-USED_MODULES = module_i2c module_startkit_gpio module_logging
+USED_MODULES = module_i2c_master module_startkit_gpio module_logging
 
 #=============================================================================
 # The following part of the Makefile includes the common build infrastructure

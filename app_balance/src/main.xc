@@ -13,7 +13,7 @@
 #include "i2c.h"
 #include "startkit_gpio.h"
 
-extern void accelerometer(client ball_if, client i2c_master_if);
+extern void accelerometer(client ball_if, r_i2c &i2c);
 
 #define HISTORY_LEN 32
 
@@ -86,8 +86,7 @@ void ball(server ball_if ball, client startkit_led_if leds) {
 }
 
 /* The ports for the I2C interface to the accelerometer */
-port p_scl = XS1_PORT_1K;
-port p_sda = XS1_PORT_1I;
+r_i2c i2c = { XS1_PORT_1K, XS1_PORT_1I, 250 };
 
 /* The ports for leds/button/capsense */
 startkit_gpio_ports gpio_ports =
@@ -96,8 +95,6 @@ startkit_gpio_ports gpio_ports =
 int main(void) {
   // These interfaces connect the tasks below together
   ball_if i_ball;
-  i2c_master_if i_i2c[1];     // these are arrays since the driver
-                              // components accept multiple clients
   startkit_led_if i_led;
 
   //  This is what the task diagram of the application is like:
@@ -117,12 +114,9 @@ int main(void) {
   //  Altogether the application takes up 2 logical cores.
 
   par {
-    // A driver task for the i2c ports
-    on tile[0]: i2c_master(i_i2c, 1, p_scl, p_sda);
-
     // This task periodically reads the position from the
     // accelerometer slice and feeds it to the ball task
-    on tile[0]: accelerometer(i_ball, i_i2c[0]);
+    on tile[0]: accelerometer(i_ball, i2c);
 
     // This task reads the ball position from the accelerometer task
     // when there is a change and updates the LED values based on
