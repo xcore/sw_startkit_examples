@@ -1,5 +1,5 @@
 #include <xs1.h>
-#include <xs1.h>
+#include <timer.h>
 
 /*
  * the patterns for each bit are:
@@ -25,15 +25,11 @@ int leds[MODES] = {
 port p32 = XS1_PORT_32A;
 
 int main(void) {
-    timer tmr;           // Create a timer to time transistions
-    int now;             // A variable to hold the current time
-    int delay = 5000000; // initial delay 50 ms (in 100 MHz ticks)
+    int delay = 50;      // initial delay 50 ms
     int led_counter = 0; // A counter to count through the leds array
-    tmr :> now;          // Get the current time, used for delaying the spinning bar
     while(1) {
-        now += delay;                     // The time that we want to wait for
-        delay += 1 * 1000 * 100;          // gradually increase the delay
-        tmr when timerafter(now) :> void; // Wait
+        delay_milliseconds(delay);        // Wait
+        delay += 1;                       // Gradually increase the delay
         p32 <: leds[led_counter];         // Drive the next led pattern
         led_counter++;                    // Pick the next pattern
         if (led_counter == MODES) {       // If we are at the last pattern
