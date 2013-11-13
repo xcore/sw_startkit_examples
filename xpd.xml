@@ -6,9 +6,9 @@
             <keyword>startKIT</keyword>
         </component>
         <component description = "A noughts and crosses game for the startKIT" type = "demoCode" scope = "Example" path = "app_noughts_and_crosses" local = "false" id = "app_noughts_and_crosses" name = "Noughts and crosses (tic-tac-toe)">
-            <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_xassert</componentDependency>
-            <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_logging</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_xassert</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sw_startkit_examples" version = "1.0.0">module_startkit_gpio</componentDependency>
             <keyword>game</keyword>
             <keyword>startKIT</keyword>
@@ -33,9 +33,9 @@ startKIT boards" type = "demoCode" scope = "Example" path = "module_startkit_gpi
             <keyword>buttons</keyword>
         </component>
         <component description = "A demo of using the accelerometer slice" type = "demoCode" scope = "Example" path = "app_balance" local = "false" id = "app_balance" name = "Balance the ball (LED)">
-            <componentDependency repo = "git://github.com/xcore/sc_i2c" version = "2.2.1">module_i2c_master</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_logging</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_i2c" version = "2.2.1">module_i2c_master</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sw_startkit_examples" version = "1.0.0">module_startkit_gpio</componentDependency>
             <keyword>accelerometer</keyword>
             <keyword>startKIT</keyword>
@@ -65,7 +65,8 @@ startKIT boards" type = "demoCode" scope = "Example" path = "module_startkit_gpi
     <release parenthash = "67ae0c9f62570a60275604eb69e9676adba2ebbb" version = "1.0.0alpha3" githash = "4f79a43044d16654967b9d1d87cf07cd326f3e23"></release>
     <release parenthash = "41623bc38f7467a00ed3be94acc82f199cb897a6" version = "1.0.0alpha4" githash = "0c3ef19488f33b3273edd269122ae116437adbe0"></release>
     <release parenthash = "a92430dc88b95263ac7002cec5118bc0fb30dc5a" version = "1.0.0alpha5" githash = "213b5988898cb7fba0b2726693141ddf2b776d69"></release>
-    <release parenthash = "a0d7a6ca02efc9146bdd8588daca6a62bdb52c41" version = "1.0.0alpha6"></release>
+    <release parenthash = "a0d7a6ca02efc9146bdd8588daca6a62bdb52c41" version = "1.0.0alpha6" githash = "b58a556246debfe3086b3240b62a296247c4d96a"></release>
+    <release parenthash = "bbff183a3834f98b49858c8d3628c3fbeb6deca7" version = "1.0.0rc0"></release>
     <subpartnumber>XM-004098-SM</subpartnumber>
     <vendor>XMOS</vendor>
     <version_defines></version_defines>
