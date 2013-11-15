@@ -3,10 +3,47 @@
 #include "random.h"
 #include "scoring.h"
 
+/** The computer player uses an auxiliary function finds a
+   move for the computer to play, it fills the
+   ``best_i`` and ``best_j`` reference parameters with the position
+   of the best move based on an AI algorithm that searches possible
+   future move combinations.
+   The parameter ``board`` is the current board state and the parameter
+   ``me`` indicates which type of piece the computer is playing.
+*/
 static void find_best_move(char board[3][3],
                            int &best_i,
                            int &best_j,
-                           board_val_t me) {
+                           board_val_t me);
+
+/** With this function, the computer player task is quite simple. It just
+    waits for the game tasks to request a move, gets a copy of the
+    board state, determines the best move to play and then communicates
+    back with the game state playing the move. */
+
+[[combinable]]
+void computer_player(client player_if game)
+{
+  while (1) {
+    select {
+    case game.move_required():
+      char board[3][3];
+      int i, j;
+      game.get_board(board);
+      find_best_move(board, i, j, game.get_my_val());
+      game.play(i, j);
+      break;
+    }
+  }
+}
+
+/****/
+
+static void find_best_move(char board[3][3],
+                           int &best_i,
+                           int &best_j,
+                           board_val_t me)
+{
   board_val_t who = me;
   int longest = -1;
   struct {int x; int y;} moves[9];
@@ -89,21 +126,4 @@ static void find_best_move(char board[3][3],
     }
   }
   return;
-}
-
-
-[[combinable]]
-void computer_player(client player_if game)
-{
-  while (1) {
-    select {
-    case game.move_required():
-      char board[3][3];
-      int i, j;
-      game.get_board(board);
-      find_best_move(board, i, j, game.get_my_val());
-      game.play(i, j);
-      break;
-    }
-  }
 }
