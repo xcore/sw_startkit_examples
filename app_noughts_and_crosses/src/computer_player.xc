@@ -3,8 +3,8 @@
 #include "random.h"
 #include "scoring.h"
 
-/** The computer player uses an auxiliary function finds a
-   move for the computer to play, it fills the
+/** The computer player uses an auxiliary function to find a
+   move for the computer to play. It fills the
    ``best_i`` and ``best_j`` reference parameters with the position
    of the best move based on an AI algorithm that searches possible
    future move combinations.
