@@ -7,7 +7,7 @@
     between the game task and the two player tasks. This includes functions
     for getting and updating the current game state.
 
-    The game task using notifications to inform the player tasks that a move is
+    The game task uses notifications to inform the player tasks that a move is
     required.
 */
 
