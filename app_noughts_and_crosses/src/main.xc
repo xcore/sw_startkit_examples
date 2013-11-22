@@ -10,14 +10,14 @@
 
 /**
   The tic-tac-toe demo is a program that plays tic-tac-toe (also known as
-  noughts and crosses on a XMOS startKIT development board. It is provided
+  noughts and crosses) on a XMOS startKIT development board. It is provided
   as a demonstation program of how to program the device.
   The 3x3 display of LEDs shows the board status:
 
     - Full LEDs: user player (marking a O)
     - Dimmed LEDs: computer player (marking a 1)
 
-  When it is the user's move one of the LEDs flashes - this is a cursor and
+  When it is the user's move, one of the LEDs flashes - this is a cursor and
   it can be moved by swiping the sliders. Pressing the button makes a move,
   and the computer player will make the next move.
 
@@ -27,7 +27,7 @@
       PWM to make the lights glow at different levels of intensity), the
       capacitive sensors on the sliders and the button. It has three
       interface connections connected to it - one for the button, one for the
-      leds and one for the slider.
+      LEDs and one for the slider.
     * The ``game`` task which controls the game state. It is connected to the
       two player tasks and to the gpio task to drive the LEDs to display the
       game state.
@@ -59,7 +59,7 @@
                                |       |
                                +-------+
 
-  The four tasks of this application are spread across two logical cores. One
+  The four tasks are spread across two logical cores. One
   logical core runs the gpio driver which needs to be responsive to the I/O
   pins. The other core runs the other three tasks which do not have real-time
   constraints and share the core via co-operative multitasking.
