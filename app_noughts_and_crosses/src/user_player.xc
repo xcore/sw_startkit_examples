@@ -2,10 +2,10 @@
 #include <print.h>
 
 /** The user player task connects to the game task and the gpio task.
-    It is either in a playing state or and idle state. When it gets a
-    move request notification from the game task it will move into the playing
-    state and set up the cursor in the game task. Whilst in the playing state
-    it will react to slider and button events to move the cursor
+    It is either in a playing state or idle state. When it gets a
+    move request notification from the game task, it moves into the playing
+    state and sets up the cursor in the game task. Whilst in the playing state
+    it reacts to slider and button events to move the cursor
     and complete the game move.
 */
 
@@ -16,19 +16,19 @@ void user_player(client player_if i_game,
                  client startkit_button_if i_button)
 {
   /** The task has some local state - a variable to determine whether it
-      is in a playing state or note, ``x`` and  ``y`` variables to store
-      the current position of the cursor and a local copy of the board state
+      is in a playing state or not, ``x`` and  ``y`` variables to store
+      the current position of the cursor and a local copy of the board state.
   */
   int playing = 0;
   int x = 0, y = 0;
   char board[3][3];
 
-  /** The main body of the task consists of a ``while (1) select`` loop */
+  /** The main body of the task consists of a ``while (1) select`` loop. */
   while (1) {
     select {
     /** The first case in the select reacts when the game tasks requests
-        a move is played. This will cause the player task to enter the playing
-        state. At this point the tasks takes a copy of the board state and
+        a move is played. This causes the player task to enter the playing
+        state. At this point the task takes a copy of the board state and
         sets up the cursor by interacting with the game task. */
     case i_game.move_required():
       // Get a local copy of the board state
@@ -48,12 +48,12 @@ void user_player(client player_if i_game,
       playing = 1;
       break;
 
-    /** If the button is pressed it will cause an event on the connection
+    /** If the button is pressed it causes an event on the connection
         to the gpio driver. The following case reacts to this event and
-        if task is in the playing state and the cursor is at an empty
-        space on the board, the task will call the ``play`` function over
-        the connection to the game task to play the move and then leave the
-        playing state */
+        if the task is in the playing state and the cursor is at an empty
+        space on the board, it calls the ``play`` function over
+        the connection to the game task to play the move, and then leave the
+        playing state. */
     case i_button.changed():
       button_val_t val = i_button.get_value();
       if (playing && val == BUTTON_DOWN) {
@@ -67,7 +67,7 @@ void user_player(client player_if i_game,
       break;
 
     /** The task also reacts to changes in the slider. In this case it
-        will move the cursor if the slider notifies the task of a
+        moves the cursor if the slider notifies the task of a
         ``LEFTING`` or ``RIGHTING`` event (indicating that the user
         has swiped left or right).
     */
