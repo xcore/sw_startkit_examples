@@ -1,7 +1,7 @@
 /******************************************************************************\
  * Header:  main
  * File:    main.h
- *  
+ *
  * Description: Definitions, types, and prototypes for main.xc
  *
  * Version: 0v1

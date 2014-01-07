@@ -1,6 +1,6 @@
 /******************************************************************************\
  * File:	main.xc
- *  
+ *
 * Top level app for dalek simulator app.
 * USes startKIT & audio slice hardware to provide various audio effects
 * Use button to select biquad filter type
@@ -27,7 +27,7 @@ void xscope_user_init( void ) // 'C' constructor function (NB called before main
 		,XSCOPE_CONTINUOUS ,"Left in" ,XSCOPE_INT ,"n"
 		,XSCOPE_CONTINUOUS ,"Left out" ,XSCOPE_INT ,"n"
 		,XSCOPE_CONTINUOUS ,"Mod" ,XSCOPE_INT ,"n"
-	); // xscope_register 
+	); // xscope_register
 
 	xscope_config_io( XSCOPE_IO_BASIC ); // Enable XScope printing
 } // xscope_user_init

@@ -1,7 +1,7 @@
 /******************************************************************************\
  * Header:  config
  * File:    config.h
- *  
+ *
  * Description: Definitions, types, and prototypes for config.xc
  *
  * Version: 0v1
@@ -44,7 +44,7 @@ extern out port p_gpio;
 #define CODEC_DACA_VOL_ADDR         0x07
 #define CODEC_DACB_VOL_ADDR         0x08
 
-#define IIC_REGWRITE(reg, val) {data[0] = val; i2c_master_write_reg(CODEC1_I2C_DEVICE_ADDR, reg, data, 1, p_i2c);data[0] = val; i2c_master_write_reg(CODEC2_I2C_DEVICE_ADDR, reg, data, 1, p_i2c);} 
+#define IIC_REGWRITE(reg, val) {data[0] = val; i2c_master_write_reg(CODEC1_I2C_DEVICE_ADDR, reg, data, 1, p_i2c);data[0] = val; i2c_master_write_reg(CODEC2_I2C_DEVICE_ADDR, reg, data, 1, p_i2c);}
 #define IIC_REGREAD(reg, val)  {i2c_master_read_reg(CODEC1_I2C_DEVICE_ADDR, reg, val, 1, p_i2c);}
 
 /*****************************************************************************/

@@ -1,7 +1,7 @@
 /******************************************************************************\
  * Header:  dsp_biquad
  * File:    dsp_biquad.h
- *  
+ *
  * Description: Definitions, types, and prototypes for dsp_biquad.xc
  *
  * Version: 0v1

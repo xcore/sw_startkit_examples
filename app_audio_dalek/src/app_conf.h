@@ -1,7 +1,7 @@
 /******************************************************************************\
  * Header:  app_conf
  * File:    app_conf.h
- *  
+ *
  * Description: Definitions for configuration of application.
  *							NB These definitions will be passed to all modules used in application
  *

@@ -1,6 +1,6 @@
 /******************************************************************************\
  * File:	dsp_biquad.xc
- *  
+ *
  * Description: Coar that applies BiQuad filter to stream of audio samples
  *
  * Version: 0v1
@@ -88,14 +88,14 @@ void dsp_biquad( // Coar that applies a BiQuad filter to a set of of audio sampl
 
 	// Loop forever
 	while(1)
-	{ 
+	{
 		// Send/Receive samples over Audio coar channel
 #pragma loop unroll
 		for (chan_cnt = 0; chan_cnt < NUM_BIQUAD_CHANS; chan_cnt++)
 		{
 			c_dsp :> inp_samps[chan_cnt];
 
-			c_dsp <: out_samps[chan_cnt]; 
+			c_dsp <: out_samps[chan_cnt];
 
 		}
 		xscope_int(0,inp_samps[0]);

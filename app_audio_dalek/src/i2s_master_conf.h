@@ -1,7 +1,7 @@
 /******************************************************************************\
  * Header:  i2s_master_conf
  * File:    i2s_master_conf.h
- *  
+ *
  * Description: Definitions for configuration of application.
  *							NB These definitions will be passed to all modules used in application
  *

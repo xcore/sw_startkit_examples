@@ -1,7 +1,7 @@
 startKIT developer board examples
 =================================
 
-:Latest release: 1.0.0rc0
+:Latest release: 1.1.0rc0
 :Maintainer: davelxmos
 :Description: startKIT example programs
 
@@ -9,7 +9,11 @@ startKIT developer board examples
 Required software (dependencies)
 ================================
 
-  * sc_capacitive_sensing (git@github.com:xcore/sc_capacitive_sensing)
-  * sc_util (git@github.com:xcore/sc_util)
+  * sc_i2s (git@github.com:xcore/sc_i2s)
   * sc_i2c (git@github.com:xcore/sc_i2c)
+  * sc_slicekit_support (https://github.com/xcore/sc_slicekit_support.git)
+  * sw_audio_effects (git@github.com:xcore/sw_audio_effects)
+  * sc_sdram_burst (https://github.com/xcore/sc_sdram_burst)
+  * sc_capacitive_sensing (git@github.com:xcore/sc_capacitive_sensing)
+  * sc_util (git://github.com/xcore/sc_util)
 
