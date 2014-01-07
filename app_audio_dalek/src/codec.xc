@@ -22,6 +22,8 @@
 
 #include "codec.h"
 
+#define DO_READ_STATUS 0
+
 /*****************************************************************************/
 void codec_config( // Configure Codec
 	unsigned samFreq, // Sample Frequency
@@ -32,7 +34,6 @@ void codec_config( // Configure Codec
     unsigned time;
     unsigned tmp;
 
-    int codec_dev_id;
     unsigned char data[1] = {0};
 
     /* Set CODEC in reset */
@@ -62,16 +63,19 @@ void codec_config( // Configure Codec
     
     /* Set power down bit in the CODEC over I2C */
     IIC_REGWRITE(CODEC_DEV_ID_ADDR, 0x01);
-    
+
+
+#if DO_READ_STATUS
     /* Read CODEC device ID to make sure everything is OK */
     IIC_REGREAD(CODEC_DEV_ID_ADDR, data);
     
-    codec_dev_id = data[0];
+    int codec_dev_id = data[0];
     if (((codec_dev_id & 0xF0) >> 4) != 0xC) 
     {
         printstr("Unexpected CODEC Device ID, expected 0xC, got ");
         printhex(codec_dev_id);
     }
+#endif
     
     /* Now set all registers as we want them :    
     Mode Control Reg:
