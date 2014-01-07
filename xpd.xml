@@ -6,10 +6,10 @@
             <keyword>startKIT</keyword>
         </component>
         <component description = "A noughts and crosses game for the startKIT" type = "demoCode" scope = "Example" path = "app_noughts_and_crosses" local = "false" id = "app_noughts_and_crosses" name = "Noughts and crosses (tic-tac-toe)">
-            <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_logging</componentDependency>
-            <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_xassert</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sw_startkit_examples" version = "1.0.0">module_startkit_gpio</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_logging</componentDependency>
             <keyword>game</keyword>
             <keyword>startKIT</keyword>
         </component>
@@ -25,6 +25,11 @@ startKIT boards" type = "demoCode" scope = "Example" path = "module_startkit_gpi
             <keyword>LEDs</keyword>
             <keyword>startKIT</keyword>
         </component>
+        <component description = "A simple demo blinks each LED on the board individually" type = "demoCode" scope = "Example" path = "app_scanning_leds" local = "false" id = "app_scanning_leds" name = "LED scan example">
+            <keyword>LEDs</keyword>
+            <keyword>startKIT</keyword>
+            <keyword>buttons</keyword>
+        </component>
         <component description = "A simple demo using LED and PWM on the startKIT" type = "demoCode" scope = "Example" path = "app_glowing_leds" local = "false" id = "app_glowing_leds" name = "Glowing LED pattern">
             <componentDependency repo = "git://github.com/xcore/sw_startkit_examples" version = "1.0.0">module_startkit_gpio</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
@@ -32,10 +37,25 @@ startKIT boards" type = "demoCode" scope = "Example" path = "module_startkit_gpi
             <keyword>startKIT</keyword>
             <keyword>buttons</keyword>
         </component>
+        <component description = "Does ring modulation (AM of LFO) and applies a BiQuad filter to a stereo stream on the startKIT/audio slice boards" type = "demoCode" scope = "Example" path = "app_audio_dalek" local = "false" id = "app_audio_dalek" name = "Startkit Dalek example">
+            <board>XA-SK-AUDIO</board>
+            <componentDependency repo = "git://github.com/xcore/sw_audio_effects.git" version = "1.0.4">module_dsp_utils</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_i2s" version = "1.4.3">module_i2s_master</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sw_startkit_examples" version = "1.0.0">module_startkit_gpio</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_i2c" version = "2.3.0">module_i2c_single_port</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sw_audio_effects.git" version = "1.0.4">module_dsp_biquad</componentDependency>
+            <keyword>biquad</keyword>
+            <keyword>filter</keyword>
+            <keyword>equalisation</keyword>
+            <keyword>audio</keyword>
+            <keyword>dsp</keyword>
+            <keyword>slicekit</keyword>
+        </component>
         <component description = "A demo of using the accelerometer slice" type = "demoCode" scope = "Example" path = "app_balance" local = "false" id = "app_balance" name = "Balance the ball (LED)">
             <componentDependency repo = "git://github.com/xcore/sc_util" version = "1.0.3">module_logging</componentDependency>
+            <componentDependency repo = "git://github.com/xcore/sc_i2c" version = "2.3.0">module_i2c_master</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sc_capacitive_sensing">module_capacitive_sensing</componentDependency>
-            <componentDependency repo = "git://github.com/xcore/sc_i2c" version = "2.2.1">module_i2c_master</componentDependency>
             <componentDependency repo = "git://github.com/xcore/sw_startkit_examples" version = "1.0.0">module_startkit_gpio</componentDependency>
             <keyword>accelerometer</keyword>
             <keyword>startKIT</keyword>
@@ -54,6 +74,15 @@ startKIT boards" type = "demoCode" scope = "Example" path = "module_startkit_gpi
         <githash>e6b1b0cd0bf368d09c51ee3586724bb1edc8390c</githash>
         <uri>git@github.com:xcore/sc_util</uri>
     </dependency>
+    <dependency repo = "sc_i2s">
+        <githash>d2195e9665b7e731f8e9ce306836151b6cad4cf2</githash>
+        <uri>git@github.com:xcore/sc_i2s</uri>
+    </dependency>
+    <dependency repo = "sw_audio_effects">
+        <githash>ef4363d1721d2d62e95cb53ee01b08894090a9a4</githash>
+        <uri>git@github.com:xcore/sw_audio_effects</uri>
+        <version>1.0.4rc0</version>
+    </dependency>
     <description>startKIT example programs</description>
     <location>git@github.com:xcore/sw_startkit_examples</location>
     <name>sw_startkit_examples</name>
@@ -66,7 +95,7 @@ startKIT boards" type = "demoCode" scope = "Example" path = "module_startkit_gpi
     <release parenthash = "41623bc38f7467a00ed3be94acc82f199cb897a6" version = "1.0.0alpha4" githash = "0c3ef19488f33b3273edd269122ae116437adbe0"></release>
     <release parenthash = "a92430dc88b95263ac7002cec5118bc0fb30dc5a" version = "1.0.0alpha5" githash = "213b5988898cb7fba0b2726693141ddf2b776d69"></release>
     <release parenthash = "a0d7a6ca02efc9146bdd8588daca6a62bdb52c41" version = "1.0.0alpha6" githash = "b58a556246debfe3086b3240b62a296247c4d96a"></release>
-    <release parenthash = "bbff183a3834f98b49858c8d3628c3fbeb6deca7" version = "1.0.0rc0"></release>
+    <release parenthash = "bbff183a3834f98b49858c8d3628c3fbeb6deca7" version = "1.0.0rc0" githash = "77343f0ac23e10f597d0e70bf6ef6d24edc2ef16"></release>
     <subpartnumber>XM-004098-SM</subpartnumber>
     <vendor>XMOS</vendor>
     <version_defines></version_defines>
