@@ -41,7 +41,7 @@
 
   .. aafig::
 
-                `gpio_driver`    `      `user task`        `cpu player task`
+                `gpio_driver`    `      `user player task` `cpu player task`
                 +--------+              +-------+          +-------+
                 |        | `button_if`  |       |          |       |
                 |        +<-------------+       |          |       |
