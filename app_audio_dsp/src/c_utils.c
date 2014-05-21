@@ -29,7 +29,6 @@ int convert_atoi_substr(const unsigned char **buffer)
     return 0;
 
   value = atoi((char*)ptr);
-  debug_printf("value = '%d'\n", value);
 
   while (*ptr && !isspace(*ptr))
     ptr++;
