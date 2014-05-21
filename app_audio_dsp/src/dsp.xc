@@ -92,13 +92,13 @@ void dsp(streaming chanend c_audio,
                 if (i_button.get_value() == BUTTON_DOWN) {
                     switch(cur_proc_state) {
                     case DSP_ON:
-                        debug_printf("Effect on\n");
+                        debug_printf("Effect off\n");
                         cur_proc_state = DSP_OFF;
                         i_led.set_multiple(0b000000000, LED_OFF);
                         break;
 
                     case DSP_OFF:
-                        debug_printf("Effect off\n");
+                        debug_printf("Effect on\n");
                         cur_proc_state = DSP_OFF;
                         cur_proc_state = DSP_ON;
                         i_led.set_multiple(0b111111111, LED_OFF);
