@@ -11,32 +11,14 @@
  * Includes for thread support
  */
 #ifdef _WIN32
-#include <winsock.h>
 
-int file_exists(char *filename)
-{
-  WIN32_FIND_DATA FindFileData;
-  HANDLE handle = FindFirstFile(filename, &FindFileData);
-  if (handle != INVALID_HANDLE_VALUE) {
-    FindClose(handle);
-    return 1;
-  } else {
-    return 0;
-  }
-}
+#include <winsock.h>
 
 #else
 
 #include <pthread.h>
 #include <unistd.h>
 
-int file_exists(char *filename)
-{
-  if (access(filename, F_OK) != -1)
-    return 1;
-  else
-    return 0;
-}
 #endif
 
 
@@ -45,17 +27,6 @@ int file_exists(char *filename)
 #define MAX_FILENAME_LEN 1024
 
 const char *g_prompt = "";
-
-/* Interface on which the glitch occurred */
-int g_interface = 0;
-/* Size of the data received */
-int g_expected_words = 0;
-
-/* The ID of the glitch probe determined from the registrations */
-int g_glitch_probe = -1;
-
-/* File is chosen on header reception */
-FILE *g_file_handle = NULL;
 
 void hook_registration_received(int sockfd, int xscope_probe, char *name)
 {

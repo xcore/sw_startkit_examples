@@ -109,7 +109,7 @@ void dsp(streaming chanend c_audio,
 
             case i_control.set_gain(int new_gain) :
                 gain = new_gain;
-                debug_printf("Gain + (%x)\n", gain);
+                debug_printf("Gain set to %x\n", gain);
                 break;
 
             case i_control.set_dbs(int index, int dbs) :
