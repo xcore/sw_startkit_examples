@@ -23,7 +23,9 @@
 #define MAX_VALUE ((1 << 23) - 1)
 #define MIN_VALUE (-(1 << 23))
 
-int do_gain(int sample, int gain){/* Apply gain, 0 to 7fffffff*/
+/* Apply gain, 0 to 7fffffff*/
+static int do_gain(int sample, int gain)
+{
   long long value = (long long) sample * (long long) gain;
 
   int ivalue = value >> 31;
@@ -40,8 +42,7 @@ int do_gain(int sample, int gain){/* Apply gain, 0 to 7fffffff*/
 void dsp(streaming chanend c_audio,
     server control_if i_control)
 {
-    biquadState bs;
-    initBiquads(bs, 20);
+    biquadState bs[NUM_APP_CHANS];
     
     int gain = 0; // Initial gain is set in the control core
 
@@ -54,9 +55,10 @@ void dsp(streaming chanend c_audio,
     // initialise samples buffers
     for (int chan_cnt = 0; chan_cnt < NUM_APP_CHANS; chan_cnt++)
     {
-        inp_samps[chan_cnt] = 0;
-        equal_samps[chan_cnt] = 0;
-        out_samps[chan_cnt] = 0;
+      initBiquads(bs[chan_cnt], 20);
+      inp_samps[chan_cnt] = 0;
+      equal_samps[chan_cnt] = 0;
+      out_samps[chan_cnt] = 0;
     }
 
     // Loop forever
@@ -76,7 +78,7 @@ void dsp(streaming chanend c_audio,
 
         for (int chan_cnt = 0; chan_cnt < NUM_APP_CHANS; chan_cnt++)
         {
-            equal_samps[chan_cnt] =  biquadCascade(bs, inp_samps[chan_cnt]);
+            equal_samps[chan_cnt] = biquadCascade(bs[chan_cnt], inp_samps[chan_cnt]);
         }
 
         select {
@@ -92,19 +94,20 @@ void dsp(streaming chanend c_audio,
                 gain = new_gain;
                 break;
 
-            case i_control.set_dbs(int index, int dbs) :
-                if (index < BANKS) {
-                  bs.desiredDb[index] = dbs;
-                } else {
+            case i_control.set_dbs(int chan_index, int bank, int dbs) :
+                for (int c = 0; c < NUM_APP_CHANS; c++) {
                   for (int i = 0; i < BANKS; i++) {
-                    bs.desiredDb[i] = dbs;
+                    if ((chan_index == NUM_APP_CHANS || chan_index == c) &&
+                        (bank == BANKS || bank == i)) {
+                      bs[c].desiredDb[i] = dbs;
+                    }
                   }
                 }
                 break;
 
-            case i_control.get_dbs(int index) -> int dbs:
+            case i_control.get_dbs(int chan_index, int index) -> int dbs:
                 if (index < BANKS) {
-                  dbs = bs.b[index].db;
+                  dbs = bs[chan_index].b[index].db;
                 } else {
                   dbs = 0;
                 }

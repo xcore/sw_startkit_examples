@@ -76,9 +76,10 @@ static int convert_atoi_substr(const char **buffer)
 void print_console_usage()
 {
   printf("Supported commands:\n");
-  printf("  h|?     : print this help message\n");
-  printf("  b B DB  : Configure bank B to DB\n");
-  printf("            B - 0-N selects bank, a selects all\n");
+  printf("  h|?      : print this help message\n");
+  printf("  b C B DB : Configure channel C bank B to DB\n");
+  printf("             C - 0-N selects channel, a selects all\n");
+  printf("             B - 0-N selects bank, a selects all\n");
   printf("  g G     : Set the gain to G (value 0-100)\n");
   printf("  q       : quit\n");
 }

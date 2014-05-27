@@ -10,6 +10,7 @@
  *      Author: Ed
  */
 
+#include "app_conf.h"
 #include "coeffs.h"
 #include "xscope.h"
 #include "control.h"
@@ -52,8 +53,13 @@ void control(chanend c_host_data,
             case 'b':
               {
                 const unsigned char * unsafe tmp = ptr;
+                char chan_char = get_next_char(&tmp);
+                int chan_index = convert_atoi_substr(&ptr);
+
+                tmp = ptr;
                 char bank_char = get_next_char(&tmp);
                 int bank = convert_atoi_substr(&ptr);
+
                 int dbs = convert_atoi_substr(&ptr);
 
                 if (dbs < 0 || dbs >= DBS) {
@@ -61,18 +67,23 @@ void control(chanend c_host_data,
                   break;
                 }
 
-                if (bank < 0 || bank >= BANKS) {
-                  debug_printf("Invalid bank value %d, use 0-%d or 'a' for all\n", bank, BANKS-1);
+                if (chan_index < 0 || chan_index >= NUM_APP_CHANS) {
+                  debug_printf("Invalid channel value %d, use 0-%d or 'a' for all channels\n", chan_index, NUM_APP_CHANS-1);
                   break;
                 }
 
-                if (bank_char == 'a') {
-                  debug_printf("All channels set to %d\n", dbs);
-                  i_control.set_dbs(BANKS, dbs);
-                } else {
-                  debug_printf("db[%x] set to %d\n", bank, dbs);
-                  i_control.set_dbs(bank, dbs);
+                if (bank < 0 || bank >= BANKS) {
+                  debug_printf("Invalid bank value %d, use 0-%d or 'a' for all banks\n", bank, BANKS-1);
+                  break;
                 }
+
+                if (chan_char == 'a')
+                  chan_index = NUM_APP_CHANS;
+
+                if (bank_char == 'a')
+                  bank = BANKS;
+
+                i_control.set_dbs(chan_index, bank, dbs);
               }
               break;
 
@@ -86,13 +97,16 @@ void control(chanend c_host_data,
               break;
 
             case 'p':
-              debug_printf("Effect %s: current gain %d, dbs: ",
+              debug_printf("Effect %s: current gain %d\n",
                   (current_effect_state == DSP_ON) ? "on" : "off", gain);
 
-              for (int i = 0; i < BANKS; i++) {
-                debug_printf(" %d", i_control.get_dbs(i));
+              for (int c = 0; c < NUM_APP_CHANS; c++) {
+                debug_printf("  Channel%d dbs:");
+                for (int i = 0; i < BANKS; i++) {
+                  debug_printf(" %d", i_control.get_dbs(c, i));
+                }
+                debug_printf("\n");
               }
-              debug_printf("\n");
               break;
               
             default:

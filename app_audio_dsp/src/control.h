@@ -13,8 +13,8 @@ typedef enum {
 typedef interface control_if {
   void set_effect(int effect_on);
 
-  void set_dbs(int index, int dbs);
-  int  get_dbs(int index);
+  void set_dbs(int chan_index, int index, int dbs);
+  int  get_dbs(int chan_index, int index);
 
   void set_gain(int gain);
 } control_if;
