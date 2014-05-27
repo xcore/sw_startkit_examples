@@ -16,14 +16,11 @@
 #ifndef _DSP_H_
 #define _DSP_H_
 
-#include "startkit_gpio.h"
 #include "control.h"
 
 void dsp(
-	streaming chanend c_audio,
-	client startkit_led_if i_led,
-	client startkit_button_if i_button,
-	server control_if i_control
+    streaming chanend c_audio,
+    server control_if i_control
 );
 
 #endif // _DSP_H_

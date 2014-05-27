@@ -18,13 +18,7 @@
 #include "dsp.h"
 #include "coeffs.h"
 #include "biquadCascade.h"
-#include "debug_print.h"
 #include "xscope.h"
-
-typedef enum {
-  DSP_OFF,
-  DSP_ON
-} dsp_state_t;
 
 #define MAX_VALUE ((1 << 23) - 1)
 #define MIN_VALUE (-(1 << 23))
@@ -44,14 +38,12 @@ int do_gain(int sample, int gain){/* Apply gain, 0 to 7fffffff*/
 }
 
 void dsp(streaming chanend c_audio,
-    client startkit_led_if i_led,
-    client startkit_button_if i_button,
     server control_if i_control)
 {
     biquadState bs;
     initBiquads(bs, 20);
     
-    int gain = MAX_GAIN;
+    int gain = 0; // Initial gain is set in the control core
 
     int inp_samps[NUM_APP_CHANS];
     int equal_samps[NUM_APP_CHANS];
@@ -66,9 +58,6 @@ void dsp(streaming chanend c_audio,
         equal_samps[chan_cnt] = 0;
         out_samps[chan_cnt] = 0;
     }
-
-    debug_printf("Effect off\n");
-    i_led.set_multiple(0b000000000, LED_OFF);
 
     // Loop forever
     while(1)
@@ -91,57 +80,34 @@ void dsp(streaming chanend c_audio,
         }
 
         select {
-            case i_button.changed():
-                if (i_button.get_value() == BUTTON_DOWN) {
-                    switch(cur_proc_state) {
-                    case DSP_ON:
-                        debug_printf("Effect off\n");
-                        cur_proc_state = DSP_OFF;
-                        i_led.set_multiple(0b000000000, LED_OFF);
-                        break;
-
-                    case DSP_OFF:
-                        debug_printf("Effect on\n");
-                        cur_proc_state = DSP_OFF;
-                        cur_proc_state = DSP_ON;
-                        i_led.set_multiple(0b111111111, LED_OFF);
-                        break;
-                    }
+            case i_control.set_effect(int effect_on) :
+                if (effect_on) {
+                  cur_proc_state = DSP_ON;
+                } else if (!effect_on) {
+                  cur_proc_state = DSP_OFF;
                 }
                 break;
 
             case i_control.set_gain(int new_gain) :
                 gain = new_gain;
-                debug_printf("Gain set to %x\n", gain);
                 break;
 
             case i_control.set_dbs(int index, int dbs) :
-                if (dbs < 0 || dbs >= DBS)
-                {
-                  debug_printf("Invalid DB value %d, use 0-%d\n", dbs, DBS);
-                  break;
-                }
-
-                if (index < BANKS)
-                {
+                if (index < BANKS) {
                   bs.desiredDb[index] = dbs;
-                  debug_printf("db[%x] set to %d\n", index, bs.desiredDb[index]);
-                }
-                else
-                {
-                  debug_printf("All channels set to %d\n", dbs);
-                  for (int i = 0; i < BANKS; i++)
+                } else {
+                  for (int i = 0; i < BANKS; i++) {
                     bs.desiredDb[i] = dbs;
+                  }
                 }
                 break;
 
-            case i_control.print() :
-                debug_printf("current db:");
-                for (int i = 0; i < BANKS; i++)
-                {
-                  debug_printf(" %d", bs.b[i].db);
+            case i_control.get_dbs(int index) -> int dbs:
+                if (index < BANKS) {
+                  dbs = bs.b[index].db;
+                } else {
+                  dbs = 0;
                 }
-                debug_printf("\n");
                 break;
 
             default:

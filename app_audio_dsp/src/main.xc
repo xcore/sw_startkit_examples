@@ -47,12 +47,12 @@ int main (void)
 
         on stdcore[0]: audio_io(c_aud_dsp);
 
-        on stdcore[0]: dsp(c_aud_dsp, i_led, i_button, i_control);
+        on stdcore[0]: dsp(c_aud_dsp, i_control);
 
         on stdcore[0]: startkit_gpio_driver(i_led, i_button,
             i_slider_x, i_slider_y, gpio_ports);
 
-        on stdcore[0]: control(c_host_data, i_control);
+        on stdcore[0]: control(c_host_data, i_led, i_button, i_control);
     }
 
     return 0;
