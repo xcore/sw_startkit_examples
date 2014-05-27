@@ -78,8 +78,8 @@ void dsp(streaming chanend c_audio,
         for (int chan_cnt = 0; chan_cnt < NUM_APP_CHANS; chan_cnt++)
         {
             c_audio :> inp_samps[chan_cnt];
-            inp_samps[chan_cnt] >>= 5;
-            c_audio <: out_samps[chan_cnt] << 5;
+            inp_samps[chan_cnt] >>= 8;
+            c_audio <: out_samps[chan_cnt] << 8;
         }
         xscope_int(0,inp_samps[0]);
         xscope_int(1,out_samps[0]);
