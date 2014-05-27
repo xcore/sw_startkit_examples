@@ -26,16 +26,19 @@ typedef enum {
   DSP_ON
 } dsp_state_t;
 
+#define MAX_VALUE ((1 << 23) - 1)
+#define MIN_VALUE (-(1 << 23))
+
 int do_gain(int sample, int gain){/* Apply gain, 0 to 7fffffff*/
   long long value = (long long) sample * (long long) gain;
 
   int ivalue = value >> 31;
 
   // Clipping
-  if (ivalue > 0x007fffff)
-    ivalue = 0x007fffff;
-  else if (ivalue < -0x00800000)
-    ivalue = -0x00800000;
+  if (ivalue > MAX_VALUE)
+    ivalue = MAX_VALUE;
+  else if (ivalue < MIN_VALUE)
+    ivalue = MIN_VALUE;
 
   return ivalue;
 }
