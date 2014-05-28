@@ -21,6 +21,24 @@
 #include "drc.h"
 #include "xscope.h"
 
+#define MAX_VALUE ((1 << 23) - 1)
+#define MIN_VALUE (-(1 << 23))
+
+/* Apply gain, 0 to 7fffffff*/
+static int do_gain(int sample, int gain)
+{
+  long long value = (long long) sample * (long long) gain;
+  int ivalue = value >> 31;
+
+  // Clipping
+  if (ivalue > MAX_VALUE)
+    ivalue = MAX_VALUE;
+  else if (ivalue < MIN_VALUE)
+    ivalue = MIN_VALUE;
+
+  return ivalue;
+}
+
 static inline void handle_control(server control_if i_control, dsp_state_t &state, int &gain,
     biquadState bs[])
 {
