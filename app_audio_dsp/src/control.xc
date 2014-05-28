@@ -17,6 +17,17 @@
 #include "debug_print.h"
 #include "c_utils.h"
 
+static void inline set_effect(client control_if i_control,
+    client startkit_led_if i_led,
+    dsp_state_t &state,
+    dsp_state_t new_state)
+{
+  state = new_state;
+  debug_printf("Effect %d\n", state);
+  i_control.set_effect(state);
+  i_led.set_multiple(state, LED_ON);
+}
+
 void control(chanend c_host_data,
     client startkit_led_if i_led,
     client startkit_button_if i_button,
@@ -32,10 +43,8 @@ void control(chanend c_host_data,
   int gain = 100;
   i_control.set_gain((MAX_GAIN / 100) * gain);
 
-  debug_printf("Effect off\n");
-  dsp_state_t current_effect_state = DSP_OFF;
-  i_control.set_effect(0);
-  i_led.set_multiple(0b000000000, LED_OFF);
+  dsp_state_t current_effect_state;
+  set_effect(i_control, i_led, current_effect_state, 0);
 
   while (1) {
     select {
@@ -97,8 +106,7 @@ void control(chanend c_host_data,
               break;
 
             case 'p':
-              debug_printf("Effect %s: current gain %d\n",
-                  (current_effect_state == DSP_ON) ? "on" : "off", gain);
+              debug_printf("Effect %d: current gain %d\n", current_effect_state, gain);
 
               for (int c = 0; c < NUM_APP_CHANS; c++) {
                 debug_printf("  Channel%d dbs:");
@@ -108,7 +116,7 @@ void control(chanend c_host_data,
                 debug_printf("\n");
               }
               break;
-              
+
             default:
               debug_printf("Unrecognised command '%c'\n", cmd);
               break;
@@ -118,21 +126,10 @@ void control(chanend c_host_data,
 
       case i_button.changed():
         if (i_button.get_value() == BUTTON_DOWN) {
-          switch(current_effect_state) {
-          case DSP_ON:
-            debug_printf("Effect off\n");
-            i_led.set_multiple(0b000000000, LED_OFF);
-            i_control.set_effect(0);
-            current_effect_state = DSP_OFF;
-            break;
-
-          case DSP_OFF:
-            debug_printf("Effect on\n");
-            i_led.set_multiple(0b111111111, LED_ON);
-            i_control.set_effect(1);
-            current_effect_state = DSP_ON;
-            break;
-          }
+          dsp_state_t new_state = current_effect_state + 1;
+          if (new_state > 3)
+            new_state = 0;
+          set_effect(i_control, i_led, current_effect_state, new_state);
         }
         break;
     }

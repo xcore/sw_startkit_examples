@@ -3,15 +3,15 @@
 
 #define MAX_GAIN 0x7fffffff
 
-typedef enum {
-  DSP_OFF,
-  DSP_ON
-} dsp_state_t;
+#define BIQUAD_ENABLED(x) (x & 0x1)
+#define DRC_ENABLED(x)    (x & 0x2)
+
+typedef int dsp_state_t;
 
 #include "startkit_gpio.h"
 
 typedef interface control_if {
-  void set_effect(int effect_on);
+  void set_effect(dsp_state_t state);
 
   void set_dbs(int chan_index, int index, int dbs);
   int  get_dbs(int chan_index, int index);
