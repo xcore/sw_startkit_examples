@@ -19,9 +19,9 @@ typedef struct drcControl {
 #define DRC_NUM_THRESHOLDS 3
 
 drcControl drcTable[DRC_NUM_THRESHOLDS] = {
-  { 0x00100000u, DRC_GAIN(70) },
-  { 0x00400000u, DRC_GAIN(50) },
-  { 0x01000000u, DRC_GAIN(30) }
+  { 0x00400000u, DRC_GAIN(70) },
+  { 0x00800000u, DRC_GAIN(30) },
+  { 0x02000000u, DRC_GAIN(10) }
 };
 
 void initDrc()
