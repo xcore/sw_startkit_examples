@@ -73,31 +73,7 @@ static int convert_atoi_substr(const char **buffer)
   return value;
 }
 
-void print_console_usage()
-{
-  printf("Supported commands:\n");
-  printf("  h|?      : print this help message\n");
-  printf("  b C B DB : Configure channel C bank B to DB\n");
-  printf("             C - 0-N selects channel, a selects all\n");
-  printf("             B - 0-N selects bank, a selects all\n");
-  printf("  g G     : Set the gain to G (value 0-100)\n");
-  printf("  q       : quit\n");
-}
-
 #define LINE_LENGTH 1024
-
-static int validate_gain(char *buffer)
-{
-  const char *ptr = &buffer[1]; // Skip command
-  const unsigned gain = convert_atoi_substr(&ptr);
-
-  if ((ptr == &buffer[1]) || (gain > 100)) {
-    printf("Invalid gain: specify a value between 0 and 100\n");
-    return 0;
-  }
-
-  return 1;
-}
 
 /*
  * A separate thread to handle user commands to control the target.
@@ -127,22 +103,8 @@ void *console_thread(void *arg)
         print_and_exit("Done\n");
         break;
 
-      case 'b':
-        xscope_ep_request_upload(sockfd, i + 1, (const unsigned char *)buffer);
-        break;
-
-      case 'g':
-        if (validate_gain(buffer))
-          xscope_ep_request_upload(sockfd, i + 1, (const unsigned char *)buffer);
-        break;
-
-      case 'h':
-      case '?':
-        print_console_usage();
-        break;
-
       default:
-        xscope_ep_request_upload(sockfd, 1, (unsigned char *)&buffer);
+        xscope_ep_request_upload(sockfd, i + 1, (const unsigned char *)buffer);
         break;
     }
   } while (1);

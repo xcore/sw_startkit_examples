@@ -62,6 +62,14 @@ static inline void handle_control(server control_if i_control, dsp_state_t &stat
       }
       break;
 
+    case i_control.set_drc_entry(int index, drcControl &control) :
+      drcTable[index] = control;
+      break;
+
+    case i_control.get_drc_entry(int index) -> drcControl control:
+      control = drcTable[index];
+      break;
+
     case i_control.get_dbs(int chan_index, int index) -> int dbs:
       if (index < BANKS) {
         dbs = bs[chan_index].b[index].db;

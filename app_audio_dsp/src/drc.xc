@@ -9,19 +9,12 @@ static int do_gain(int sample, int gain)
   return value >> 31;
 }
 
-typedef struct drcControl {
-  int base;
-  int gain;
-} drcControl;
-
-#define DRC_GAIN(x) ((x==100) ? 0x7fffffffll : (0x7fffffffll / (long long)100 * (long long)x))
-
-#define DRC_NUM_THRESHOLDS 3
+#define DRC_GAIN(x) (x), ((x==100) ? 0x7fffffffll : (0x7fffffffll / (long long)100 * (long long)x))
 
 drcControl drcTable[DRC_NUM_THRESHOLDS] = {
-  { 0x00400000u, DRC_GAIN(70) },
-  { 0x00800000u, DRC_GAIN(30) },
-  { 0x02000000u, DRC_GAIN(10) }
+  { 0x00200000u, DRC_GAIN(70) },
+  { 0x00400000u, DRC_GAIN(50) },
+  { 0x00600000u, DRC_GAIN(30) }
 };
 
 void initDrc()
@@ -36,8 +29,8 @@ int drc(int xn)
     negative = 1;
   }
   for (int i = 0; i < DRC_NUM_THRESHOLDS; i++) {
-    if (xn > drcTable[i].base) {
-      xn = drcTable[i].base + do_gain(xn - drcTable[i].base, drcTable[i].gain);
+    if (xn > drcTable[i].threshold) {
+      xn = drcTable[i].threshold + do_gain(xn - drcTable[i].threshold, drcTable[i].gain_factor);
     }
   }
   if (negative)

@@ -28,6 +28,18 @@ static void inline set_effect(client control_if i_control,
   i_led.set_multiple(state, LED_ON);
 }
 
+static void print_usage()
+{
+  debug_printf("Supported commands:\n");
+  debug_printf("  h|?      : print this help message\n");
+  debug_printf("  b C B DB : Configure channel C bank B to DB\n");
+  debug_printf("             C - 0-N selects channel, a selects all\n");
+  debug_printf("             B - 0-N selects bank, a selects all\n");
+  debug_printf("  g G     : Set the gain to G (value 0-100)\n");
+  debug_printf("  d I T G : Configure DRC table index I. Set the threshold T and gain G\n");
+  debug_printf("  q       : quit\n");
+}
+
 void control(chanend c_host_data,
     client startkit_led_if i_led,
     client startkit_button_if i_button,
@@ -105,16 +117,48 @@ void control(chanend c_host_data,
               }
               break;
 
+            case 'd':
+              {
+                debug_printf("Got %s\n", ptr);
+                int index = convert_atoi_substr(&ptr);
+                drcControl control;
+                control.threshold = convert_atoi_substr(&ptr);
+                control.gain = convert_atoi_substr(&ptr);
+                control.gain_factor = (MAX_GAIN / 100) * control.gain;
+
+                if (index < 0 || index >= DRC_NUM_THRESHOLDS) {
+                  debug_printf("Invalid threshold index %d, use 0-%d\n", index, DRC_NUM_THRESHOLDS);
+                  break;
+                }
+
+                i_control.set_drc_entry(index, control);
+                debug_printf("Threshold %d set to %d (%x) above %d\n", index,
+                    control.gain, control.gain_factor, control.threshold);
+              }
+              break;
+
             case 'p':
               debug_printf("Effect %d: current gain %d\n", current_effect_state, gain);
 
               for (int c = 0; c < NUM_APP_CHANS; c++) {
-                debug_printf("  Channel%d dbs:");
+                debug_printf("  Channel%d dbs:", c);
                 for (int i = 0; i < BANKS; i++) {
                   debug_printf(" %d", i_control.get_dbs(c, i));
                 }
                 debug_printf("\n");
               }
+
+              debug_printf("DRC Table:\n");
+              for (int d = 0; d < DRC_NUM_THRESHOLDS; d++) {
+                drcControl control = i_control.get_drc_entry(d);
+                debug_printf(" %d: threshold %d, gain %d (%x)\n", d,
+                    control.threshold, control.gain, control.gain_factor);
+              }
+              break;
+
+            case 'h':
+            case '?':
+              print_usage();
               break;
 
             default:
