@@ -126,13 +126,13 @@ c_audio :> inp_samps[chan_cnt];
       int b_sample = biquadCascade(bs[chan_cnt], inp_samps[chan_cnt]);
 
       int d_sample;
-      if (BIQUAD_ENABLED(cur_proc_state)) {
+      if (GET_BIQUAD_ENABLED(cur_proc_state)) {
         d_sample = drc(b_sample);
       } else {
         d_sample = drc(inp_samps[chan_cnt]);
       }
 
-      if (DRC_ENABLED(cur_proc_state)) {
+      if (GET_DRC_ENABLED(cur_proc_state)) {
         equal_samps[chan_cnt] = d_sample;
       } else {
         equal_samps[chan_cnt] = b_sample;

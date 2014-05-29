@@ -3,8 +3,10 @@
 
 #define MAX_GAIN 0x7fffffff
 
-#define BIQUAD_ENABLED(x) (x & 0x1)
-#define DRC_ENABLED(x)    (x & 0x2)
+#define GET_BIQUAD_ENABLED(x)    (x & 0x1)
+#define SET_BIQUAD_ENABLED(x, v) ((x & ~0x1) | (v & 0x1))
+#define GET_DRC_ENABLED(x)       (x & 0x2)
+#define SET_DRC_ENABLED(x, v)    ((x & ~0x2) | ((v & 0x1) << 1))
 
 typedef int dsp_state_t;
 

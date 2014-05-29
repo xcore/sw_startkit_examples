@@ -22,6 +22,9 @@ static void inline set_effect(client control_if i_control,
     dsp_state_t &state,
     dsp_state_t new_state)
 {
+  if (state == new_state)
+    return;
+
   state = new_state;
   debug_printf("Effect %d\n", state);
   i_control.set_effect(state);
@@ -36,7 +39,9 @@ static void print_usage()
   debug_printf("             C - 0-N selects channel, a selects all\n");
   debug_printf("             B - 0-N selects bank, a selects all\n");
   debug_printf("  g G     : Set the gain to G (value 0-100)\n");
-  debug_printf("  d I T G : Configure DRC table index I. Set the threshold T and gain G\n");
+  debug_printf("  t I T G : Configure DRC table index I. Set the threshold T and gain G\n");
+  debug_printf("  e b|d   : Enable either biquads (b) or DRC (d)\n");
+  debug_printf("  d b|d   : Disable either biquads (b) or DRC (d)\n");
   debug_printf("  q       : quit\n");
 }
 
@@ -71,6 +76,28 @@ void control(chanend c_host_data,
           char cmd = get_next_char(&ptr);
 
           switch (cmd) {
+            case 'e':
+            case 'd':
+              {
+                char effect = get_next_char(&ptr);
+                dsp_state_t new_state = current_effect_state;
+                switch (effect) {
+                  case 'b':
+                    new_state = SET_BIQUAD_ENABLED(current_effect_state, (cmd == 'e') ? 1 : 0);
+                    break;
+
+                  case 'd':
+                    new_state = SET_DRC_ENABLED(current_effect_state, (cmd == 'e') ? 1 : 0);
+                    break;
+
+                  default:
+                    debug_printf("Invalid effect '%c', use 'b' for biquads and 'd' for DRC\n", effect);
+                    break;
+                }
+                set_effect(i_control, i_led, current_effect_state, new_state);
+                break;
+              }
+
             case 'b':
               {
                 const unsigned char * unsafe tmp = ptr;
@@ -117,7 +144,7 @@ void control(chanend c_host_data,
               }
               break;
 
-            case 'd':
+            case 't':
               {
                 debug_printf("Got %s\n", ptr);
                 int index = convert_atoi_substr(&ptr);
@@ -138,7 +165,8 @@ void control(chanend c_host_data,
               break;
 
             case 'p':
-              debug_printf("Effect %d: current gain %d\n", current_effect_state, gain);
+              debug_printf("Current gain %d\n", gain);
+              debug_printf("Biquads %s\n", GET_BIQUAD_ENABLED(current_effect_state) ? "on" : "off");
 
               for (int c = 0; c < NUM_APP_CHANS; c++) {
                 debug_printf("  Channel%d dbs:", c);
@@ -148,7 +176,7 @@ void control(chanend c_host_data,
                 debug_printf("\n");
               }
 
-              debug_printf("DRC Table:\n");
+              debug_printf("DRC %s: Table:\n", GET_DRC_ENABLED(current_effect_state) ? "on" : "off");
               for (int d = 0; d < DRC_NUM_THRESHOLDS; d++) {
                 drcControl control = i_control.get_drc_entry(d);
                 debug_printf(" %d: threshold %d, gain %d (%x)\n", d,
