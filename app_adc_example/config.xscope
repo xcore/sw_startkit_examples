@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xSCOPEconfig enabled="true" ioMode="basic">
+  <Probe name="ADC0" type="CONTINUOUS" datatype="INT" units="n" enabled="true"/>
+  <Probe name="ADC1" type="CONTINUOUS" datatype="INT" units="n" enabled="true"/>
+  <Probe name="ADC2" type="CONTINUOUS" datatype="INT" units="n" enabled="true"/>
+  <Probe name="ADC3" type="CONTINUOUS" datatype="INT" units="n" enabled="true"/>  
+</xSCOPEconfig>
