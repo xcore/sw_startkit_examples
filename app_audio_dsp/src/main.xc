@@ -31,6 +31,13 @@ void xscope_user_init( void ) // 'C' constructor function (NB called before main
 } // xscope_user_init
 #endif // ifdef USE_XSCOPE
 
+// A function to simply consume cycles
+void filler()
+{
+  set_core_fast_mode_on();
+  while (1) { }
+}
+
 /*****************************************************************************/
 int main (void)
 {
@@ -53,6 +60,11 @@ int main (void)
             i_slider_x, i_slider_y, gpio_ports);
 
         on stdcore[0]: control(c_host_data, i_led, i_button, i_control);
+
+        on stdcore[0]: filler();
+        on stdcore[0]: filler();
+        on stdcore[0]: filler();
+        on stdcore[0]: filler();
     }
 
     return 0;

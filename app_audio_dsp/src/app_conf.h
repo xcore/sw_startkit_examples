@@ -28,8 +28,12 @@
 /** Number of audio channels used in this application */
 #define NUM_APP_CHANS 2
 
-/** Number of BiQuad filters used in this application */
-#define NUM_APP_BIQUADS 1
+#define MAX_GAIN  0x7fffffff
+
+// The signal values are signed 24-bit values
+#define MAX_VALUE ((1 << 23) - 1)
+#define MIN_VALUE (-(1 << 23))
+
 
 #endif // _APP_CONF_H_
 /******************************************************************************/

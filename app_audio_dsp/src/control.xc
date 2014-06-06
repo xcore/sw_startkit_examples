@@ -34,15 +34,31 @@ static void inline set_effect(client control_if i_control,
 static void print_usage()
 {
   debug_printf("Supported commands:\n");
-  debug_printf("  h|?      : print this help message\n");
-  debug_printf("  b C B DB : Configure channel C bank B to DB\n");
-  debug_printf("             C - 0-N selects channel, a selects all\n");
-  debug_printf("             B - 0-N selects bank, a selects all\n");
-  debug_printf("  g G     : Set the gain to G (value 0-100)\n");
-  debug_printf("  t I T G : Configure DRC table index I. Set the threshold T and gain G\n");
-  debug_printf("  e b|d   : Enable either biquads (b) or DRC (d)\n");
-  debug_printf("  d b|d   : Disable either biquads (b) or DRC (d)\n");
-  debug_printf("  q       : quit\n");
+  debug_printf("  h|?       : print this help message\n");
+  debug_printf("  b C B DB  : Configure channel C bank B to DB\n");
+  debug_printf("              C - 0-N selects channel, a selects all\n");
+  debug_printf("              B - 0-N selects bank, a selects all\n");
+  debug_printf("  p G       : Set the pre-gain to G (value 0-100)\n");
+  debug_printf("  g G       : Set the gain to G (value 0-100)\n");
+  debug_printf("  t I T G   : Configure DRC table index I.\n");
+  debug_printf("              Set the threshold T and gain G as a percent of full range (0-100)\n");
+  debug_printf("  e b|d     : Enable either biquads (b) or DRC (d)\n");
+  debug_printf("  d b|d     : Disable either biquads (b) or DRC (d)\n");
+  debug_printf("  l C A R T : Configure the level detection for channel C.\n");
+  debug_printf("              The attack A and release R times in ns\n");
+  debug_printf("              The threshold T in percent of full range value (0-100)\n");
+  debug_printf("  s         : Show the current state\n");
+  debug_printf("  q         : quit\n");
+}
+
+static int validate_percent(int percent, const char *type_string)
+{
+  if (percent < 0 || percent > 100) {
+    debug_printf("Invalid value '%d' for %s, please specify value in the range 0-100\n",
+        percent, type_string);
+    return 1;
+  }
+  return 0;
 }
 
 void control(chanend c_host_data,
@@ -57,6 +73,8 @@ void control(chanend c_host_data,
   int bytes_read = 0;
 
   // Set initial state
+  int pre_gain = 0;
+  i_control.set_pre_gain((((MAX_GAIN - PRE_GAIN_OFFSET) / 100) * pre_gain) + PRE_GAIN_OFFSET);
   int gain = 100;
   i_control.set_gain((MAX_GAIN / 100) * gain);
 
@@ -135,9 +153,22 @@ void control(chanend c_host_data,
               }
               break;
 
+            case 'p':
+              {
+                pre_gain = convert_atoi_substr(&ptr);
+                if (validate_percent(gain, "gain"))
+                  break;
+                int gain_factor = (((MAX_GAIN - PRE_GAIN_OFFSET) / 100) * pre_gain) + PRE_GAIN_OFFSET;
+                i_control.set_pre_gain(gain_factor);
+                debug_printf("Pre gain set to %d (%x)\n", pre_gain, gain_factor);
+              }
+              break;
+
             case 'g':
               {
                 gain = convert_atoi_substr(&ptr);
+                if (validate_percent(gain, "gain"))
+                  break;
                 int gain_factor = (MAX_GAIN / 100) * gain;
                 i_control.set_gain(gain_factor);
                 debug_printf("Gain set to %d (%x)\n", gain, gain_factor);
@@ -146,26 +177,55 @@ void control(chanend c_host_data,
 
             case 't':
               {
-                debug_printf("Got %s\n", ptr);
                 int index = convert_atoi_substr(&ptr);
                 drcControl control;
-                control.threshold = convert_atoi_substr(&ptr);
-                control.gain = convert_atoi_substr(&ptr);
-                control.gain_factor = (MAX_GAIN / 100) * control.gain;
+
+                control.threshold_percent = convert_atoi_substr(&ptr);
+                if (validate_percent(control.threshold_percent, "threshold"))
+                  break;
+                control.threshold = (MAX_VALUE / 100) * control.threshold_percent;
+
+                control.gain_percent = convert_atoi_substr(&ptr);
+                if (validate_percent(control.gain_percent, "gain"))
+                  break;
+                control.gain_factor = (MAX_GAIN / 100) * control.gain_percent;
 
                 if (index < 0 || index >= DRC_NUM_THRESHOLDS) {
-                  debug_printf("Invalid threshold index %d, use 0-%d\n", index, DRC_NUM_THRESHOLDS);
+                  debug_printf("Invalid threshold index %d, use 0-%d\n", index, DRC_NUM_THRESHOLDS - 1);
                   break;
                 }
 
                 i_control.set_drc_entry(index, control);
-                debug_printf("Threshold %d set to %d (%x) above %d\n", index,
-                    control.gain, control.gain_factor, control.threshold);
               }
               break;
 
-            case 'p':
-              debug_printf("Current gain %d\n", gain);
+            case 'l':
+              {
+                const unsigned char * unsafe tmp = ptr;
+                char chan_char = get_next_char(&tmp);
+                int chan_index = convert_atoi_substr(&ptr);
+
+                if (chan_index < 0 || chan_index >= NUM_APP_CHANS) {
+                  debug_printf("Invalid channel index %d, use 0-%d\n", chan_index, NUM_APP_CHANS - 1);
+                  break;
+                }
+
+                if (chan_char == 'a')
+                  chan_index = NUM_APP_CHANS;
+
+                levelState state;
+                int attack_ns = convert_atoi_substr(&ptr);
+                int release_ns = convert_atoi_substr(&ptr);
+                int threshold_percent = convert_atoi_substr(&ptr);
+                if (validate_percent(threshold_percent, "threshold"))
+                  break;
+                initLevelState(state, attack_ns, release_ns, threshold_percent);
+                i_control.set_level_entry(chan_index, state);
+              }
+              break;
+
+            case 's':
+              debug_printf("Current pre-gain %d, gain %d\n", pre_gain, gain);
               debug_printf("Biquads %s\n", GET_BIQUAD_ENABLED(current_effect_state) ? "on" : "off");
 
               for (int c = 0; c < NUM_APP_CHANS; c++) {
@@ -173,14 +233,17 @@ void control(chanend c_host_data,
                 for (int i = 0; i < BANKS; i++) {
                   debug_printf(" %d", i_control.get_dbs(c, i));
                 }
-                debug_printf("\n");
+                levelState state = i_control.get_level_entry(c);
+                debug_printf("\n           Level threshold %d (%x), attack %d, release %d\n",
+                    state.threshold_percent, state.threshold, state.attack_ns, state.release_ns);
               }
 
               debug_printf("DRC %s: Table:\n", GET_DRC_ENABLED(current_effect_state) ? "on" : "off");
               for (int d = 0; d < DRC_NUM_THRESHOLDS; d++) {
                 drcControl control = i_control.get_drc_entry(d);
-                debug_printf(" %d: threshold %d, gain %d (%x)\n", d,
-                    control.threshold, control.gain, control.gain_factor);
+                debug_printf(" %d: threshold %d (%x), gain %d (%x)\n", d,
+                    control.threshold_percent, control.threshold,
+                    control.gain_percent, control.gain_factor);
               }
               break;
 

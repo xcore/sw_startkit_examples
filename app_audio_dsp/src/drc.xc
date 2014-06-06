@@ -1,41 +1,58 @@
 #include "drc.h"
 #include "debug_print.h"
 #include "xclib.h"
+#include "app_conf.h"
+#include "level.h"
 
-/* Apply gain, 0 to 7fffffff*/
 static int do_gain(int sample, int gain)
 {
   long long value = (long long) sample * (long long) gain;
   return value >> 31;
 }
 
-#define DRC_GAIN(x) (x), ((x==100) ? 0x7fffffffll : (0x7fffffffll / (long long)100 * (long long)x))
+static int merge(int a, int b, int a_not_b)
+{
+  long long tmp_a = (long long) a * (long long) a_not_b;
+  long long tmp_b = (long long) b * (long long) (MAX_GAIN - a_not_b);
+
+  a = tmp_a >> 31;
+  b = tmp_b >> 31;
+
+  return a + b;
+}
+
+#define DRC_THRESHOLD(x) (x), ((x==100) ? MAX_VALUE : (MAX_VALUE / (long long)100 * (long long)x))
+#define DRC_GAIN(x) (x), ((x==100) ? MAX_GAIN : (MAX_GAIN / (long long)100 * (long long)x))
 
 drcControl drcTable[DRC_NUM_THRESHOLDS] = {
-  { 0x00200000u, DRC_GAIN(70) },
-  { 0x00400000u, DRC_GAIN(50) },
-  { 0x00600000u, DRC_GAIN(30) }
+  { DRC_THRESHOLD(30), DRC_GAIN(70) },
+  { DRC_THRESHOLD(50), DRC_GAIN(50) },
+  { DRC_THRESHOLD(70), DRC_GAIN(30) }
 };
 
 void initDrc()
 {
 }
 
-int drc(int xn)
+int drc(int xn, int level)
 {
+  int drc_value = xn;
   int negative = 0;
+
   if (xn < 0) {
-    xn = -xn;
+    drc_value = -xn;
     negative = 1;
   }
+
   for (int i = 0; i < DRC_NUM_THRESHOLDS; i++) {
-    if (xn > drcTable[i].threshold) {
-      xn = drcTable[i].threshold + do_gain(xn - drcTable[i].threshold, drcTable[i].gain_factor);
+    if (drc_value > drcTable[i].threshold) {
+      drc_value = drcTable[i].threshold + do_gain(drc_value - drcTable[i].threshold, drcTable[i].gain_factor);
     }
   }
+
   if (negative)
-    return -xn;
-  else
-    return xn;
+    drc_value = -drc_value;
+
+  return merge(drc_value, xn, level << LEVEL_TO_GAIN_SHIFT);
 }
 
