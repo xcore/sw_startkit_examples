@@ -38,79 +38,55 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
+#include <QtWidgets>
 
-#include "window.h"
+#include "biquad_controls.h"
+#include "biquad_slider.h"
 
-/*
- * Includes for thread support
- */
-#ifdef _WIN32
-  #include <winsock.h>
-#else
-  #include <pthread.h>
-#endif
+const QString bank_title[NUM_BIQUADS] = {
+    "Low Pass",
+    "125 Hz",
+    "250 Hz",
+    "500 Hz",
+    "1 kHz",
+    "2 kHz",
+    "4 kHz",
+    "6 kHz",
+    "8kHz",
+    "High Pass",
+};
 
-#include "xscope_host_shared.h"
-
-extern "C" void hook_registration_received(int sockfd, int xscope_probe, char *name)
+BiquadControls::BiquadControls(const QString &title, QWidget *parent)
+    : QGroupBox(title, parent)
 {
-    // Ignore
-}
-
-extern "C" void hook_data_received(int sockfd, int xscope_probe, void *data, int data_len)
-{
-    // Ignore
-}
-
-extern "C" void hook_exiting()
-{
-    // Ignore
-}
-
-int g_sockfd;
-
-#ifdef _WIN32
-DWORD WINAPI control_thread(void *arg)
-#else
-void *control_thread(void *arg)
-#endif
-{
-    char *server_ip = "127.0.0.1";
-    char *port_str = "12346";
-    int sockfds[1] = {0};
-    sockfds[0] = initialise_socket(server_ip, port_str);
-    g_sockfd = sockfds[0];
-    if (sockfds[0] >= 0)
-        handle_sockets(sockfds, 1);
-
-#ifdef _WIN32
-    return 0;
-#else
-    return NULL;
-#endif
-}
-
-int main(int argc, char *argv[])
-{
-#ifdef _WIN32
-    HANDLE thread;
-    thread = CreateThread(NULL, 0, control_thread, NULL, 0, NULL);
-    if (thread == NULL) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
+    QBoxLayout *slidersLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+    for (int i = 0; i < NUM_BIQUADS; i++) {
+        m_controls[i] = new BiquadSlider(bank_title[i], i, this);
+        slidersLayout->addWidget(m_controls[i]);
     }
-#else
-    pthread_t tid;
-    int err = pthread_create(&tid, NULL, &control_thread, NULL);
-    if (err != 0) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
-    }
-#endif
 
-    QApplication app(argc, argv);
-    Window window;
-    window.show();
-    return app.exec();
+    for (int i = 0; i < NUM_BIQUADS; i++) {
+        for (int j = 0; j < NUM_BIQUADS; j++) {
+            if (i == j)
+                continue;
+            connect(m_controls[i], SIGNAL(valueChanged(int)), m_controls[j], SLOT(setValue(int)));
+        }
+        connect(m_controls[i], SIGNAL(valueChanged(int, int)), parent, SLOT(setBiquadBank(int, int)));
+    }
+
+    setLayout(slidersLayout);
+}
+
+void BiquadControls::selectAll()
+{
+    for (int i = 0; i < NUM_BIQUADS; i++) {
+        m_controls[i]->setSelected(true);
+    }
+}
+
+void BiquadControls::selectNone()
+{
+    for (int i = 0; i < NUM_BIQUADS; i++) {
+        m_controls[i]->setSelected(false);
+    }
 }

@@ -38,79 +38,37 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
+#ifndef _BIQUAD_SLIDER_H_
+#define _BIQUAD_SLIDER_H_
 
-#include "window.h"
+#include <QGroupBox>
 
-/*
- * Includes for thread support
- */
-#ifdef _WIN32
-  #include <winsock.h>
-#else
-  #include <pthread.h>
-#endif
+QT_BEGIN_NAMESPACE
+class QSlider;
+class QSpinBox;
+class QCheckBox;
+QT_END_NAMESPACE
 
-#include "xscope_host_shared.h"
-
-extern "C" void hook_registration_received(int sockfd, int xscope_probe, char *name)
+class BiquadSlider : public QGroupBox
 {
-    // Ignore
-}
+    Q_OBJECT
 
-extern "C" void hook_data_received(int sockfd, int xscope_probe, void *data, int data_len)
-{
-    // Ignore
-}
+public:
+    BiquadSlider(const QString &title, int index, QWidget *parent = 0);
 
-extern "C" void hook_exiting()
-{
-    // Ignore
-}
+signals:
+    void valueChanged(int value);
+    void valueChanged(int index, int value);
 
-int g_sockfd;
+public slots:
+    void setValue(int value);
+    void setSelected(bool selected);
 
-#ifdef _WIN32
-DWORD WINAPI control_thread(void *arg)
-#else
-void *control_thread(void *arg)
-#endif
-{
-    char *server_ip = "127.0.0.1";
-    char *port_str = "12346";
-    int sockfds[1] = {0};
-    sockfds[0] = initialise_socket(server_ip, port_str);
-    g_sockfd = sockfds[0];
-    if (sockfds[0] >= 0)
-        handle_sockets(sockfds, 1);
+private:
+    int m_index;
+    QSlider *m_slider;
+    QSpinBox *m_valueSpinBox;
+    QCheckBox *m_selected;
+};
 
-#ifdef _WIN32
-    return 0;
-#else
-    return NULL;
-#endif
-}
-
-int main(int argc, char *argv[])
-{
-#ifdef _WIN32
-    HANDLE thread;
-    thread = CreateThread(NULL, 0, control_thread, NULL, 0, NULL);
-    if (thread == NULL) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
-    }
-#else
-    pthread_t tid;
-    int err = pthread_create(&tid, NULL, &control_thread, NULL);
-    if (err != 0) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
-    }
-#endif
-
-    QApplication app(argc, argv);
-    Window window;
-    window.show();
-    return app.exec();
-}
+#endif // _BIQUAD_SLIDER_H_

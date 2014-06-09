@@ -38,79 +38,57 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
+#include <QtWidgets>
 
-#include "window.h"
+#include "biquad_slider.h"
 
-/*
- * Includes for thread support
- */
-#ifdef _WIN32
-  #include <winsock.h>
-#else
-  #include <pthread.h>
-#endif
+#define SLIDER_MIN 0
+#define SLIDER_MAX 24
+#define SLIDER_INITIAL 20
 
-#include "xscope_host_shared.h"
-
-extern "C" void hook_registration_received(int sockfd, int xscope_probe, char *name)
+BiquadSlider::BiquadSlider(const QString &title, int index, QWidget *parent)
+    : QGroupBox(title, parent)
+    , m_index(index)
 {
-    // Ignore
+    m_slider = new QSlider(Qt::Vertical);
+    m_slider->setFocusPolicy(Qt::StrongFocus);
+    m_slider->setTickPosition(QSlider::TicksBothSides);
+    m_slider->setTickInterval(10);
+    m_slider->setSingleStep(1);
+    m_slider->setMinimum(SLIDER_MIN);
+    m_slider->setMaximum(SLIDER_MAX);
+    m_slider->setValue(SLIDER_INITIAL);
+
+    m_valueSpinBox = new QSpinBox;
+    m_valueSpinBox->setRange(SLIDER_MIN, SLIDER_MAX);
+    m_valueSpinBox->setSingleStep(1);
+    m_valueSpinBox->setValue(SLIDER_INITIAL);
+
+    m_selected = new QCheckBox;
+    m_selected->setChecked(true);
+
+    connect(m_slider, SIGNAL(valueChanged(int)), m_valueSpinBox, SLOT(setValue(int)));
+    connect(m_valueSpinBox, SIGNAL(valueChanged(int)), m_slider, SLOT(setValue(int)));
+
+    connect(m_slider, SIGNAL(valueChanged(int)), this, SIGNAL(valueChanged(int)));
+
+    QBoxLayout *sliderLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+    sliderLayout->addWidget(m_slider);
+    sliderLayout->addWidget(m_valueSpinBox);
+    sliderLayout->addWidget(m_selected);
+
+    setLayout(sliderLayout);
 }
 
-extern "C" void hook_data_received(int sockfd, int xscope_probe, void *data, int data_len)
+void BiquadSlider::setValue(int value)
 {
-    // Ignore
-}
-
-extern "C" void hook_exiting()
-{
-    // Ignore
-}
-
-int g_sockfd;
-
-#ifdef _WIN32
-DWORD WINAPI control_thread(void *arg)
-#else
-void *control_thread(void *arg)
-#endif
-{
-    char *server_ip = "127.0.0.1";
-    char *port_str = "12346";
-    int sockfds[1] = {0};
-    sockfds[0] = initialise_socket(server_ip, port_str);
-    g_sockfd = sockfds[0];
-    if (sockfds[0] >= 0)
-        handle_sockets(sockfds, 1);
-
-#ifdef _WIN32
-    return 0;
-#else
-    return NULL;
-#endif
-}
-
-int main(int argc, char *argv[])
-{
-#ifdef _WIN32
-    HANDLE thread;
-    thread = CreateThread(NULL, 0, control_thread, NULL, 0, NULL);
-    if (thread == NULL) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
+    if (m_selected->isChecked()) {
+        m_slider->setValue(value);
+        valueChanged(m_index, value);
     }
-#else
-    pthread_t tid;
-    int err = pthread_create(&tid, NULL, &control_thread, NULL);
-    if (err != 0) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
-    }
-#endif
+}
 
-    QApplication app(argc, argv);
-    Window window;
-    window.show();
-    return app.exec();
+void BiquadSlider::setSelected(bool selected)
+{
+    m_selected->setChecked(selected);
 }

@@ -38,79 +38,62 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
+#ifndef WINDOW_H
+#define WINDOW_H
 
-#include "window.h"
+#include <QWidget>
 
-/*
- * Includes for thread support
- */
-#ifdef _WIN32
-  #include <winsock.h>
-#else
-  #include <pthread.h>
+QT_BEGIN_NAMESPACE
+class QCheckBox;
+class QGroupBox;
+class QLabel;
+class QDial;
+class QStackedWidget;
+class QPushButton;
+class BiquadControls;
+QT_END_NAMESPACE
+
+//! [0]
+class Window : public QWidget
+{
+    Q_OBJECT
+
+public:
+    Window();
+
+public slots:
+    void enableBiquads(bool enable);
+    void enableDrc(bool enable);
+
+    void setPreGain(int value);
+    void setGain(int value);
+
+    void setBiquadBank(int index, int value);
+
+private:
+    void createControls(const QString &title);
+
+    QStackedWidget *stackedWidget;
+
+    // BIQUADS
+    QGroupBox *biquadControls;
+    BiquadControls *biquadSliders;
+    QCheckBox *biquadEnable;
+    QPushButton *selectAll;
+    QPushButton *selectNone;
+
+    // DRC
+    QGroupBox *drcControls;
+    QCheckBox *drcEnable;
+
+    // GAIN
+    QGroupBox *controlsGroup;
+
+    QLabel *preGainLabel;
+    QDial *preGainDial;
+
+    QLabel *gainLabel;
+    QDial *gainDial;
+};
+
 #endif
-
-#include "xscope_host_shared.h"
-
-extern "C" void hook_registration_received(int sockfd, int xscope_probe, char *name)
-{
-    // Ignore
-}
-
-extern "C" void hook_data_received(int sockfd, int xscope_probe, void *data, int data_len)
-{
-    // Ignore
-}
-
-extern "C" void hook_exiting()
-{
-    // Ignore
-}
-
-int g_sockfd;
-
-#ifdef _WIN32
-DWORD WINAPI control_thread(void *arg)
-#else
-void *control_thread(void *arg)
-#endif
-{
-    char *server_ip = "127.0.0.1";
-    char *port_str = "12346";
-    int sockfds[1] = {0};
-    sockfds[0] = initialise_socket(server_ip, port_str);
-    g_sockfd = sockfds[0];
-    if (sockfds[0] >= 0)
-        handle_sockets(sockfds, 1);
-
-#ifdef _WIN32
-    return 0;
-#else
-    return NULL;
-#endif
-}
-
-int main(int argc, char *argv[])
-{
-#ifdef _WIN32
-    HANDLE thread;
-    thread = CreateThread(NULL, 0, control_thread, NULL, 0, NULL);
-    if (thread == NULL) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
-    }
-#else
-    pthread_t tid;
-    int err = pthread_create(&tid, NULL, &control_thread, NULL);
-    if (err != 0) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
-    }
-#endif
-
-    QApplication app(argc, argv);
-    Window window;
-    window.show();
-    return app.exec();
-}

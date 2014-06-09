@@ -38,79 +38,30 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
+#ifndef _BIQUAD_CONTROLS_H_
+#define _BIQUAD_CONTROLS_H_
 
-#include "window.h"
+#include <QGroupBox>
 
-/*
- * Includes for thread support
- */
-#ifdef _WIN32
-  #include <winsock.h>
-#else
-  #include <pthread.h>
-#endif
+QT_BEGIN_NAMESPACE
+class BiquadSlider;
+QT_END_NAMESPACE
 
-#include "xscope_host_shared.h"
+#define NUM_BIQUADS 10
 
-extern "C" void hook_registration_received(int sockfd, int xscope_probe, char *name)
+class BiquadControls : public QGroupBox
 {
-    // Ignore
-}
+    Q_OBJECT
 
-extern "C" void hook_data_received(int sockfd, int xscope_probe, void *data, int data_len)
-{
-    // Ignore
-}
+public:
+    BiquadControls(const QString &title, QWidget *parent = 0);
 
-extern "C" void hook_exiting()
-{
-    // Ignore
-}
+public slots:
+    void selectAll();
+    void selectNone();
 
-int g_sockfd;
+private:
+    BiquadSlider *m_controls[NUM_BIQUADS];
+};
 
-#ifdef _WIN32
-DWORD WINAPI control_thread(void *arg)
-#else
-void *control_thread(void *arg)
-#endif
-{
-    char *server_ip = "127.0.0.1";
-    char *port_str = "12346";
-    int sockfds[1] = {0};
-    sockfds[0] = initialise_socket(server_ip, port_str);
-    g_sockfd = sockfds[0];
-    if (sockfds[0] >= 0)
-        handle_sockets(sockfds, 1);
-
-#ifdef _WIN32
-    return 0;
-#else
-    return NULL;
-#endif
-}
-
-int main(int argc, char *argv[])
-{
-#ifdef _WIN32
-    HANDLE thread;
-    thread = CreateThread(NULL, 0, control_thread, NULL, 0, NULL);
-    if (thread == NULL) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
-    }
-#else
-    pthread_t tid;
-    int err = pthread_create(&tid, NULL, &control_thread, NULL);
-    if (err != 0) {
-      printf("ERROR: Failed to create console thread\n");
-      exit(1);
-    }
-#endif
-
-    QApplication app(argc, argv);
-    Window window;
-    window.show();
-    return app.exec();
-}
+#endif // _BIQUAD_CONTROLS_H_

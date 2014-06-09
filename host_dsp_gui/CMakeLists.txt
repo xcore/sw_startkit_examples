@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 project (host_dsp_gui)
 enable_testing()
 
-set (CMAKE_PREFIX_PATH "/Users/andy/Qt5.2.1/5.2.1/clang_64")
+set (CMAKE_PREFIX_PATH "/Users/peter/Qt5.3.0/5.3.0/clang_64")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
