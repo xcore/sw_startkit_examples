@@ -25,9 +25,9 @@ static int merge(int a, int b, int a_not_b)
 #define DRC_GAIN(x) (x), ((x==100) ? MAX_GAIN : (MAX_GAIN / (long long)100 * (long long)x))
 
 drcControl drcTable[DRC_NUM_THRESHOLDS] = {
-  { DRC_THRESHOLD(30), DRC_GAIN(70) },
-  { DRC_THRESHOLD(50), DRC_GAIN(50) },
-  { DRC_THRESHOLD(70), DRC_GAIN(30) }
+  { DRC_THRESHOLD(60), DRC_GAIN(70) },
+  { DRC_THRESHOLD(70), DRC_GAIN(60) },
+  { DRC_THRESHOLD(80), DRC_GAIN(50) }
 };
 
 void initDrc()

@@ -3,6 +3,10 @@
 
 #define MAX_NUM_SOCKETS 10
 
+#if defined(__XC__) || defined(__cplusplus)
+extern "C" {
+#endif
+
 typedef struct upload_queue_entry_t {
   unsigned int length;
   unsigned char *data;
@@ -22,7 +26,12 @@ typedef struct socket_data_t {
 
 void allocate_socket_data(int sockfd);
 upload_queue_entry_t *new_entry(unsigned length, const unsigned char *data);
+int queue_empty(int sockfd);
 void queue_add(int sockfd, upload_queue_entry_t *entry);
 void queue_complete_head(int sockfd);
+
+#if defined(__XC__) || defined(__cplusplus)
+}
+#endif
 
 #endif // __queues_h__

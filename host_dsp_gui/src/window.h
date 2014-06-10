@@ -51,9 +51,13 @@ class QDial;
 class QStackedWidget;
 class QPushButton;
 class BiquadControls;
+class QSpinBox;
 QT_END_NAMESPACE
 
-//! [0]
+#define MAX_COMMAND_LEN 100
+
+extern int g_sockfd;
+
 class Window : public QWidget
 {
     Q_OBJECT
@@ -69,31 +73,37 @@ public slots:
     void setGain(int value);
 
     void setBiquadBank(int index, int value);
+    void setLevelAttack(int value);
+    void setLevelRelease(int value);
+    void setLevelThreshold(int value);
 
 private:
-    void createControls(const QString &title);
+    void createBiquadControls();
+    void createDrcControls();
+    void createControls();
 
-    QStackedWidget *stackedWidget;
+    QStackedWidget *m_stackedWidget;
 
     // BIQUADS
-    QGroupBox *biquadControls;
-    BiquadControls *biquadSliders;
-    QCheckBox *biquadEnable;
-    QPushButton *selectAll;
-    QPushButton *selectNone;
+    QGroupBox *m_biquadControlBox;
+    BiquadControls *m_biquadSliders;
+    QCheckBox *m_biquadEnable;
+    QPushButton *m_selectAll;
+    QPushButton *m_selectNone;
+    QPushButton *m_selectInvert;
 
     // DRC
-    QGroupBox *drcControls;
-    QCheckBox *drcEnable;
+    QGroupBox *m_drcControlBox;
+    QCheckBox *m_drcEnable;
 
     // GAIN
-    QGroupBox *controlsGroup;
+    QGroupBox *m_preGainBox;
+    QDial *m_preGainDial;
+    QSpinBox *m_preGainSpinBox;
 
-    QLabel *preGainLabel;
-    QDial *preGainDial;
-
-    QLabel *gainLabel;
-    QDial *gainDial;
+    QGroupBox *m_gainBox;
+    QDial *m_gainDial;
+    QSpinBox *m_gainSpinBox;
 };
 
 #endif

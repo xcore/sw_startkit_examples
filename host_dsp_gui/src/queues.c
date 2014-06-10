@@ -94,6 +94,16 @@ static void manage_queue(socket_data_t *socket_data)
   socket_data->upload_active = 1;
 }
 
+int queue_empty(int sockfd)
+{
+  socket_data_t *socket_data = get_socket_data(sockfd);
+
+  if (socket_data->queue.head == NULL)
+    return 1;
+  else
+    return 0;
+}
+
 void queue_add(int sockfd, upload_queue_entry_t *entry)
 {
   socket_data_t *socket_data = get_socket_data(sockfd);

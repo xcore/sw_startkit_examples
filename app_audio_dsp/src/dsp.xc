@@ -28,16 +28,18 @@
  * So, with a shift of 31, the gain value of 0x7fffffff has no affect.
  * The shift value must be in the range 0..31
  */
-static int do_gain(int sample, int gain, int shift)
+static int do_gain(int sample, int gain, int shift, int clip)
 {
   long long value = (long long) sample * (long long) gain;
   int ivalue = value >> shift;
 
-  // Clipping
-  if (ivalue > MAX_VALUE)
-    ivalue = MAX_VALUE;
-  else if (ivalue < MIN_VALUE)
-    ivalue = MIN_VALUE;
+  if (clip) {
+    // Clipping
+    if (ivalue > MAX_VALUE)
+      ivalue = MAX_VALUE;
+    else if (ivalue < MIN_VALUE)
+      ivalue = MIN_VALUE;
+  }
 
   return ivalue;
 }
@@ -77,10 +79,21 @@ static inline void handle_control(server control_if i_control, dsp_state_t &stat
       control = drcTable[index];
       break;
 
-    case i_control.set_level_entry(int index, levelState &state) :
+    case i_control.set_level_entry(int index, levelState &state, int flags) :
       for (int i = 0; i < NUM_APP_CHANS; i++) {
         if (index == NUM_APP_CHANS || index == i)
-          ls[i] = state;
+          if (flags & LEVEL_ATTACK) {
+            ls[i].attack_micro_sec = state.attack_micro_sec;
+            ls[i].attack_rate = state.attack_rate;
+          }
+          if (flags & LEVEL_RELEASE) {
+            ls[i].release_micro_sec = state.release_micro_sec;
+            ls[i].release_rate = state.release_rate;
+          }
+          if (flags & LEVEL_THRESHOLD) {
+            ls[i].threshold_percent = state.threshold_percent;
+            ls[i].threshold = state.threshold;
+          }
       }
       break;
 
@@ -121,7 +134,7 @@ void dsp(streaming chanend c_audio, server control_if i_control)
   {
     // Initialise all state
     initBiquads(bs[chan_cnt], 20);
-    initLevelState(ls[chan_cnt], 1000000, 4000000, 20);
+    initLevelState(ls[chan_cnt], 1000, 4000, 20);
     inp_samps[chan_cnt] = 0;
     equal_samps[chan_cnt] = 0;
     out_samps[chan_cnt] = 0;
@@ -141,7 +154,7 @@ void dsp(streaming chanend c_audio, server control_if i_control)
 
     // Perform pre-amp gain
     for (int chan_cnt = 0; chan_cnt < NUM_APP_CHANS; chan_cnt++)
-      inp_samps[chan_cnt] = do_gain(inp_samps[chan_cnt], pre_gain, PRE_GAIN_BITS);
+      inp_samps[chan_cnt] = do_gain(inp_samps[chan_cnt], pre_gain, PRE_GAIN_BITS, 0);
 
     xscope_int(0, inp_samps[0]);
     xscope_int(1, out_samps[0]);
@@ -177,7 +190,7 @@ void dsp(streaming chanend c_audio, server control_if i_control)
     }
 
     for (int chan_cnt = 0; chan_cnt < NUM_APP_CHANS; chan_cnt++)
-      out_samps[chan_cnt] = do_gain(out_samps[chan_cnt], gain, 31);
+      out_samps[chan_cnt] = do_gain(out_samps[chan_cnt], gain, 31, 1);
   } // while(1)
 }
 

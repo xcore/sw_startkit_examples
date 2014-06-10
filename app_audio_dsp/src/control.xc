@@ -44,9 +44,9 @@ static void print_usage()
   debug_printf("              Set the threshold T and gain G as a percent of full range (0-100)\n");
   debug_printf("  e b|d     : Enable either biquads (b) or DRC (d)\n");
   debug_printf("  d b|d     : Disable either biquads (b) or DRC (d)\n");
-  debug_printf("  l C A R T : Configure the level detection for channel C.\n");
-  debug_printf("              The attack A and release R times in ns\n");
-  debug_printf("              The threshold T in percent of full range value (0-100)\n");
+  debug_printf("  a C A     : Configure the level detection attack A for channel C (in microsecs).\n");
+  debug_printf("  r C R     : Configure the level detection release R for channel C (in microsecs).\n");
+  debug_printf("  l C T     : Configure the level detection threshold T for channel C (0-100).\n");
   debug_printf("  s         : Show the current state\n");
   debug_printf("  q         : quit\n");
 }
@@ -160,7 +160,6 @@ void control(chanend c_host_data,
                   break;
                 int gain_factor = (((MAX_GAIN - PRE_GAIN_OFFSET) / 100) * pre_gain) + PRE_GAIN_OFFSET;
                 i_control.set_pre_gain(gain_factor);
-                debug_printf("Pre gain set to %d (%x)\n", pre_gain, gain_factor);
               }
               break;
 
@@ -171,7 +170,6 @@ void control(chanend c_host_data,
                   break;
                 int gain_factor = (MAX_GAIN / 100) * gain;
                 i_control.set_gain(gain_factor);
-                debug_printf("Gain set to %d (%x)\n", gain, gain_factor);
               }
               break;
 
@@ -199,6 +197,8 @@ void control(chanend c_host_data,
               }
               break;
 
+            case 'a':
+            case 'r':
             case 'l':
               {
                 const unsigned char * unsafe tmp = ptr;
@@ -214,13 +214,21 @@ void control(chanend c_host_data,
                   chan_index = NUM_APP_CHANS;
 
                 levelState state;
-                int attack_ns = convert_atoi_substr(&ptr);
-                int release_ns = convert_atoi_substr(&ptr);
-                int threshold_percent = convert_atoi_substr(&ptr);
-                if (validate_percent(threshold_percent, "threshold"))
-                  break;
-                initLevelState(state, attack_ns, release_ns, threshold_percent);
-                i_control.set_level_entry(chan_index, state);
+                if (cmd == 'a') {
+                  int attack_micro_sec = convert_atoi_substr(&ptr);
+                  initLevelState(state, attack_micro_sec, 0, 0);
+                  i_control.set_level_entry(chan_index, state, LEVEL_ATTACK);
+                } else if (cmd == 'r') {
+                  int release_micro_sec = convert_atoi_substr(&ptr);
+                  initLevelState(state, 0, release_micro_sec, 0);
+                  i_control.set_level_entry(chan_index, state, LEVEL_RELEASE);
+                } else if (cmd == 'l') {
+                  int threshold_percent = convert_atoi_substr(&ptr);
+                  if (validate_percent(threshold_percent, "threshold"))
+                    break;
+                  initLevelState(state, 0, 0, threshold_percent);
+                  i_control.set_level_entry(chan_index, state, LEVEL_THRESHOLD);
+                }
               }
               break;
 
@@ -235,7 +243,10 @@ void control(chanend c_host_data,
                 }
                 levelState state = i_control.get_level_entry(c);
                 debug_printf("\n           Level threshold %d (%x), attack %d, release %d\n",
-                    state.threshold_percent, state.threshold, state.attack_ns, state.release_ns);
+                    state.threshold_percent,
+                    state.threshold,
+                    state.attack_micro_sec,
+                    state.release_micro_sec);
               }
 
               debug_printf("DRC %s: Table:\n", GET_DRC_ENABLED(current_effect_state) ? "on" : "off");

@@ -2,7 +2,7 @@
 #define __mutex_h__
 
 #ifdef _WIN32
-  #include <windows.h> 
+  #include <windows.h>
   typedef HANDLE mutex_t;
 #else
   #include <pthread.h>

@@ -43,130 +43,136 @@
 #include <string.h>
 
 #include "biquad_controls.h"
+#include "drc_controls.h"
 #include "window.h"
 #include "xscope_host_shared.h"
-
-extern int g_sockfd;
+#include "queues.h"
 
 Window::Window()
 {
-    biquadSliders = new BiquadControls(tr("Biquads"), this);
+    createBiquadControls();
+    createDrcControls();
+    createControls();
 
-    stackedWidget = new QStackedWidget;
-    stackedWidget->addWidget(biquadSliders);
-
-    createControls(tr("Controls"));
-
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->addWidget(controlsGroup);
-    layout->addWidget(stackedWidget);
+    QGridLayout *layout = new QGridLayout();
+    layout->addWidget(m_preGainBox, 0, 0);
+    layout->addWidget(m_biquadControlBox, 0, 1);
+    layout->addWidget(m_gainBox, 1, 0);
+    layout->addWidget(m_drcControlBox, 1, 1);
     setLayout(layout);
 
-    setWindowTitle(tr("Sliders"));
+    setWindowTitle(tr("DSP Control"));
 }
 
-void Window::createControls(const QString &title)
+void Window::createBiquadControls()
 {
     // BIQUADS
-    biquadControls = new QGroupBox(tr("BiQuads"));
-    QBoxLayout *biquadLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+    m_biquadSliders = new BiquadControls(NULL, this);
 
-    biquadEnable = new QCheckBox(tr("Enable"));
-    connect(biquadEnable, SIGNAL(toggled(bool)),
-            this, SLOT(enableBiquads(bool)));
+    m_biquadControlBox = new QGroupBox(tr("Biquads"));
+    QBoxLayout *topLayout = new QBoxLayout(QBoxLayout::TopToBottom);
 
-    selectAll = new QPushButton(tr("Select All"));
-    connect(selectAll, SIGNAL(pressed()),
-            biquadSliders, SLOT(selectAll()));
+    m_biquadEnable = new QCheckBox(tr("Enable"));
+    connect(m_biquadEnable, SIGNAL(toggled(bool)), this, SLOT(enableBiquads(bool)));
 
-    selectNone = new QPushButton(tr("Select None"));
-    connect(selectNone, SIGNAL(pressed()),
-            biquadSliders, SLOT(selectNone()));
+    m_selectAll = new QPushButton(tr("Select all"));
+    connect(m_selectAll, SIGNAL(pressed()), m_biquadSliders, SLOT(selectAll()));
 
-    biquadLayout->addWidget(biquadEnable);
-    biquadLayout->addWidget(selectAll);
-    biquadLayout->addWidget(selectNone);
-    biquadControls->setLayout(biquadLayout);
+    m_selectNone = new QPushButton(tr("Select none"));
+    connect(m_selectNone, SIGNAL(pressed()), m_biquadSliders, SLOT(selectNone()));
 
+    m_selectInvert = new QPushButton(tr("Invert selection"));
+    connect(m_selectInvert, SIGNAL(pressed()), m_biquadSliders, SLOT(invertSelection()));
 
-    // DRC
-    drcControls = new QGroupBox(tr("DRC"));
-    QBoxLayout *drcLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+    QBoxLayout *controlsLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+    controlsLayout->addWidget(m_biquadEnable);
+    controlsLayout->addWidget(m_selectAll);
+    controlsLayout->addWidget(m_selectNone);
+    controlsLayout->addWidget(m_selectInvert);
 
-    drcEnable = new QCheckBox(tr("Enable"));
-    connect(drcEnable, SIGNAL(toggled(bool)),
-            this, SLOT(enableDrc(bool)));
-    drcLayout->addWidget(drcEnable);
-    drcControls->setLayout(drcLayout);
+    QGroupBox *controls = new QGroupBox();
+    controls->setLayout(controlsLayout);
 
-
-    // GAIN
-    controlsGroup = new QGroupBox(title);
-
-    preGainLabel = new QLabel(tr("Pre Amp"));
-
-    preGainDial = new QDial;
-    preGainDial->setRange(0, 100);
-    preGainDial->setSingleStep(1);
-    preGainDial->setValue(0);
-    connect(preGainDial, SIGNAL(valueChanged(int)),
-            this, SLOT(setPreGain(int)));
-
-    gainLabel = new QLabel(tr("Gain"));
-
-    gainDial = new QDial;
-    gainDial->setRange(0, 100);
-    gainDial->setSingleStep(1);
-    gainDial->setValue(100);
-    connect(gainDial, SIGNAL(valueChanged(int)),
-            this, SLOT(setGain(int)));
-
-    QGridLayout *controlsLayout = new QGridLayout;
-    controlsLayout->addWidget(preGainDial, 0, 0);
-    controlsLayout->addWidget(preGainLabel, 1, 0);
-    controlsLayout->addWidget(gainDial, 0, 1);
-    controlsLayout->addWidget(gainLabel, 1, 1);
-    controlsLayout->addWidget(biquadControls, 0, 2);
-    controlsLayout->addWidget(drcControls, 1, 2);
-    controlsGroup->setLayout(controlsLayout);
+    topLayout->addWidget(controls);
+    topLayout->addWidget(m_biquadSliders);
+    m_biquadControlBox->setLayout(topLayout);
 }
 
-#define MAX_COMMAND_LEN 100
+void Window::createDrcControls()
+{
+    // DRC
+    m_drcControlBox = new QGroupBox(tr("DRC"));
+    QBoxLayout *drcLayout = new QBoxLayout(QBoxLayout::TopToBottom);
 
-const std::string commands[] = {
-    "e b",
-    "d b",
-    "e d",
-    "d d",
-};
+    DrcControls *drcControls = new DrcControls(NULL, this);
 
-typedef enum {
-    COMMAND_ENABLE_BIQUADS = 0,
-    COMMAND_DISABLE_BIQUADS,
-    COMMAND_ENABLE_DRC,
-    COMMAND_DISABLE_DRC,
-} CommandIds;
+    m_drcEnable = new QCheckBox(tr("Enable"));
+    connect(m_drcEnable, SIGNAL(toggled(bool)), this, SLOT(enableDrc(bool)));
+    drcLayout->addWidget(m_drcEnable);
+    drcLayout->addWidget(drcControls);
+    m_drcControlBox->setLayout(drcLayout);
+}
+
+void Window::createControls()
+{
+    // GAIN
+    m_preGainBox = new QGroupBox(tr("Pre Amp"));
+    QBoxLayout *preGainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+
+    m_preGainDial = new QDial;
+    m_preGainDial->setRange(0, 100);
+    m_preGainDial->setSingleStep(1);
+    m_preGainDial->setValue(0);
+    connect(m_preGainDial, SIGNAL(valueChanged(int)), this, SLOT(setPreGain(int)));
+
+    m_preGainSpinBox = new QSpinBox;
+    m_preGainSpinBox->setRange(0, 100);
+    m_preGainSpinBox->setSingleStep(1);
+    m_preGainSpinBox->setValue(0);
+
+    connect(m_preGainDial, SIGNAL(valueChanged(int)), m_preGainSpinBox, SLOT(setValue(int)));
+    connect(m_preGainSpinBox, SIGNAL(valueChanged(int)), m_preGainDial, SLOT(setValue(int)));
+
+    preGainLayout->addWidget(m_preGainDial);
+    preGainLayout->addWidget(m_preGainSpinBox);
+    m_preGainBox->setLayout(preGainLayout);
+
+    m_gainBox = new QGroupBox(tr("Gain"));
+    QBoxLayout *gainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+
+    m_gainDial = new QDial;
+    m_gainDial->setRange(0, 100);
+    m_gainDial->setSingleStep(1);
+    m_gainDial->setValue(100);
+    connect(m_gainDial, SIGNAL(valueChanged(int)), this, SLOT(setGain(int)));
+
+    m_gainSpinBox = new QSpinBox;
+    m_gainSpinBox->setRange(0, 100);
+    m_gainSpinBox->setSingleStep(1);
+    m_gainSpinBox->setValue(100);
+
+    connect(m_gainDial, SIGNAL(valueChanged(int)), m_gainSpinBox, SLOT(setValue(int)));
+    connect(m_gainSpinBox, SIGNAL(valueChanged(int)), m_gainDial, SLOT(setValue(int)));
+
+    gainLayout->addWidget(m_gainDial);
+    gainLayout->addWidget(m_gainSpinBox);
+    m_gainBox->setLayout(gainLayout);
+}
 
 void Window::enableBiquads(bool enable)
 {
-    const char *cmd;
-    if (enable) {
-        cmd = commands[COMMAND_ENABLE_BIQUADS].c_str();
-    } else {
-        cmd = commands[COMMAND_DISABLE_BIQUADS].c_str();
-    }
-    xscope_ep_request_upload(g_sockfd, strlen(cmd), (const unsigned char *)cmd);
+    char cmd[MAX_COMMAND_LEN] = "";
+    memset(&cmd[0], 0, sizeof(cmd));
+    sprintf(&cmd[0], "%s b", enable ? "e" : "d");
+    xscope_ep_request_upload(g_sockfd, strlen(cmd) + 1, (const unsigned char *)cmd);
 }
 
 void Window::enableDrc(bool enable)
 {
-    const char *cmd;
-    if (enable) {
-        cmd = commands[COMMAND_ENABLE_DRC].c_str();
-    } else {
-        cmd = commands[COMMAND_DISABLE_DRC].c_str();
-    }
-    xscope_ep_request_upload(g_sockfd, strlen(cmd), (const unsigned char *)cmd);
+    char cmd[MAX_COMMAND_LEN] = "";
+    memset(&cmd[0], 0, sizeof(cmd));
+    sprintf(&cmd[0], "%s d", enable ? "e" : "d");
+    xscope_ep_request_upload(g_sockfd, strlen(cmd) + 1, (const unsigned char *)cmd);
 }
 
 void Window::setPreGain(int value)
@@ -174,8 +180,7 @@ void Window::setPreGain(int value)
     char cmd[MAX_COMMAND_LEN] = "";
     memset(&cmd[0], 0, sizeof(cmd));
     sprintf(&cmd[0], "p %d", value);
-    size_t len = strlen(cmd) + 1;
-    xscope_ep_request_upload(g_sockfd, len, (const unsigned char *)cmd);
+    xscope_ep_request_upload(g_sockfd, strlen(cmd) + 1, (const unsigned char *)cmd);
 }
 
 void Window::setGain(int value)
@@ -183,15 +188,43 @@ void Window::setGain(int value)
     char cmd[MAX_COMMAND_LEN] = "";
     memset(&cmd[0], 0, sizeof(cmd));
     sprintf(&cmd[0], "g %d", value);
-    size_t len = strlen(cmd) + 1;
-    xscope_ep_request_upload(g_sockfd, len, (const unsigned char *)cmd);
+    xscope_ep_request_upload(g_sockfd, strlen(cmd) + 1, (const unsigned char *)cmd);
 }
 
 void Window::setBiquadBank(int index, int value)
 {
     char cmd[MAX_COMMAND_LEN] = "";
     memset(&cmd[0], 0, sizeof(cmd));
-    sprintf(&cmd[0], "b a %d %d", index, value);
-    size_t len = strlen(cmd) + 1;
-    xscope_ep_request_upload(g_sockfd, len, (const unsigned char *)cmd);
+    if (m_biquadSliders->allSelected())
+        sprintf(&cmd[0], "b a a %d", value);
+    else
+        sprintf(&cmd[0], "b a %d %d", index, value);
+
+    // Prevent too many commands being sent
+    if (queue_empty(g_sockfd))
+        xscope_ep_request_upload(g_sockfd, strlen(cmd) + 1, (const unsigned char *)cmd);
+}
+
+void Window::setLevelAttack(int value)
+{
+    char cmd[MAX_COMMAND_LEN] = "";
+    memset(&cmd[0], 0, sizeof(cmd));
+    sprintf(&cmd[0], "a a %d", value);
+    xscope_ep_request_upload(g_sockfd, strlen(cmd) + 1, (const unsigned char *)cmd);
+}
+
+void Window::setLevelRelease(int value)
+{
+    char cmd[MAX_COMMAND_LEN] = "";
+    memset(&cmd[0], 0, sizeof(cmd));
+    sprintf(&cmd[0], "r a %d", value);
+    xscope_ep_request_upload(g_sockfd, strlen(cmd) + 1, (const unsigned char *)cmd);
+}
+
+void Window::setLevelThreshold(int value)
+{
+    char cmd[MAX_COMMAND_LEN] = "";
+    memset(&cmd[0], 0, sizeof(cmd));
+    sprintf(&cmd[0], "l a %d", value);
+    xscope_ep_request_upload(g_sockfd, strlen(cmd) + 1, (const unsigned char *)cmd);
 }

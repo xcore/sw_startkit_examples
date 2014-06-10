@@ -15,6 +15,10 @@ typedef int dsp_state_t;
 #include "drc.h"
 #include "level.h"
 
+#define LEVEL_ATTACK    1
+#define LEVEL_RELEASE   2
+#define LEVEL_THRESHOLD 4
+
 typedef interface control_if {
   void set_effect(dsp_state_t state);
 
@@ -24,7 +28,7 @@ typedef interface control_if {
   void set_drc_entry(int index, drcControl &control);
   drcControl get_drc_entry(int index);
 
-  void set_level_entry(int index, levelState &state);
+  void set_level_entry(int index, levelState &state, int flags);
   levelState get_level_entry(int index);
 
   void set_pre_gain(int gain);
