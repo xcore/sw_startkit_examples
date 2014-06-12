@@ -1,25 +1,7 @@
-/******************************************************************************\
- * Header:  config
- * File:    config.h
- *
- * Description: Definitions, types, and prototypes for config.xc
- *
- * Version: 0v1
- * Build:
- *
- * The copyrights, all other intellectual and industrial
- * property rights are retained by XMOS and/or its licensors.
- * Terms and conditions covering the use of this code can
- * be found in the Xmos End User License Agreement.
- *
- * Copyright XMOS Ltd 2012
- *
- * In the case where this code is a modification of existing code
- * under a separate license, the separate license terms are shown
- * below. The modifications to the code are still covered by the
- * copyright notice above.
- *
-\******************************************************************************/
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
 
 #ifndef _CODEC_H_
 #define _CODEC_H_
@@ -47,13 +29,6 @@ extern out port p_gpio;
 #define IIC_REGWRITE(reg, val) {data[0] = val; i2c_master_write_reg(CODEC1_I2C_DEVICE_ADDR, reg, data, 1, p_i2c);data[0] = val; i2c_master_write_reg(CODEC2_I2C_DEVICE_ADDR, reg, data, 1, p_i2c);}
 #define IIC_REGREAD(reg, val)  {i2c_master_read_reg(CODEC1_I2C_DEVICE_ADDR, reg, val, 1, p_i2c);}
 
-/*****************************************************************************/
-void codec_config( // Configure Codec
-	unsigned samFreq, // Sample Frequency
-	unsigned mClk // Master Clock
-);
-/*****************************************************************************/
+void codec_config(unsigned sampleFrequency, unsigned mClk);
 
 #endif // _CODEC_H_
-/*****************************************************************************/
-// codec.h

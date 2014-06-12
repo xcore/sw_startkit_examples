@@ -1,14 +1,7 @@
-/*
- * lfo.xc
- *
- * Generates a 5 - 40 Hz Triangle waveform and sends it over a channel
- * Amplitude and frequency are controlled via the sliders on startKIT
- *
- * Every millisecond, it sends a new sample across
- *
- *  Created on: Oct 17, 2013
- *      Author: Ed
- */
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
 
 #include "app_conf.h"
 #include "coeffs.h"

@@ -1,5 +1,10 @@
-#ifndef __drc_h__
-#define __drc_h__
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
+
+#ifndef __DRC_H__
+#define __DRC_H__
 
 #define DRC_NUM_THRESHOLDS 3
 
@@ -35,4 +40,4 @@ extern void initDrc();
  */
 extern int drc(int xn, int level);
 
-#endif // __drc_h__
+#endif // __DRC_H__

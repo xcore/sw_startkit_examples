@@ -1,5 +1,10 @@
-#ifndef __level_h__
-#define __level_h__
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
+
+#ifndef __LEVEL_H__
+#define __LEVEL_H__
 
 #include "app_global.h"
 
@@ -26,4 +31,4 @@ extern void initLevelState(levelState &ls, int attack_micro_sec, int release_mic
 
 extern void computeLevel(levelState &ls, int xn);
 
-#endif // __level_h__
+#endif // __LEVEL_H__

@@ -1,3 +1,7 @@
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
 
 /* General output port bit definitions */
 //These are on port as defined by #define PORT_GPIO in app_global.h

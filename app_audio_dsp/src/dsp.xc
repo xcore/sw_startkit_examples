@@ -1,17 +1,7 @@
-/******************************************************************************\
- * The copyrights, all other intellectual and industrial
- * property rights are retained by XMOS and/or its licensors.
- * Terms and conditions covering the use of this code can
- * be found in the Xmos End User License Agreement.
- *
- * Copyright XMOS Ltd 2014
- *
- * In the case where this code is a modification of existing code
- * under a separate license, the separate license terms are shown
- * below. The modifications to the code are still covered by the
- * copyright notice above.
- *
-\******************************************************************************/
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
 
 #include "app_conf.h"
 #include "app_global.h"
@@ -21,7 +11,6 @@
 #include "drc.h"
 #include "level.h"
 #include "xscope.h"
-
 
 /* Apply gain:
  * A value of ((1 << (shift + 1)) - 1) will produce no volume change.
@@ -79,9 +68,9 @@ static inline void handle_control(server control_if i_control, dsp_state_t &stat
       control = drcTable[index];
       break;
 
-    case i_control.set_level_entry(int index, levelState &state, int flags) :
+    case i_control.set_level_entry(int chan_index, levelState &state, int flags) :
       for (int i = 0; i < NUM_APP_CHANS; i++) {
-        if (index == NUM_APP_CHANS || index == i)
+        if (chan_index == NUM_APP_CHANS || chan_index == i)
           if (flags & LEVEL_ATTACK) {
             ls[i].attack_micro_sec = state.attack_micro_sec;
             ls[i].attack_rate = state.attack_rate;
@@ -97,8 +86,8 @@ static inline void handle_control(server control_if i_control, dsp_state_t &stat
       }
       break;
 
-    case i_control.get_level_entry(int index) -> levelState state:
-      state = ls[index];
+    case i_control.get_level_entry(int chan_index) -> levelState state:
+      state = ls[chan_index];
       break;
 
     case i_control.get_dbs(int chan_index, int index) -> int dbs:

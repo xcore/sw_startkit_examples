@@ -1,27 +1,7 @@
-/******************************************************************************\
- * Header:  app_global
- * File:    app_global.h
- *
- * Description: Global Definitions, types, and prototypes for application
- *
- * Version: 0v1
- * Build:
- *
- * The copyrights, all other intellectual and industrial
- * property rights are retained by XMOS and/or its licensors.
- * Terms and conditions covering the use of this code can
- * be found in the Xmos End User License Agreement.
- *
- * Copyright XMOS Ltd 2012
- *
- * In the case where this code is a modification of existing code
- * under a separate license, the separate license terms are shown
- * below. The modifications to the code are still covered by the
- * copyright notice above.
- *
-\******************************************************************************/
-
-
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
 
 #ifndef _APP_GLOBAL_H_
 #define _APP_GLOBAL_H_
@@ -69,6 +49,4 @@
 #error currently not un-supported slice hw version
 #endif
 
-#endif // ifndef _APP_GLOBAL_H_
-/*****************************************************************************/
-// app_global.h
+#endif // _APP_GLOBAL_H_

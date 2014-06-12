@@ -1,24 +1,14 @@
-/******************************************************************************\
- * The copyrights, all other intellectual and industrial
- * property rights are retained by XMOS and/or its licensors.
- * Terms and conditions covering the use of this code can
- * be found in the Xmos End User License Agreement.
- *
- * Copyright XMOS Ltd 2012
- *
- * In the case where this code is a modification of existing code
- * under a separate license, the separate license terms are shown
- * below. The modifications to the code are still covered by the
- * copyright notice above.
- *
-\******************************************************************************/
+// Copyright (c) 2013, XMOS Ltd, All rights reserved
+// This software is freely distributable under a derivative of the
+// University of Illinois/NCSA Open Source License posted in
+// LICENSE.txt and at <http://github.xcore.com/>
 
 #include "codec.h"
 #include "debug_print.h"
 
 #define DO_READ_STATUS 0
 
-void codec_config(unsigned samFreq, unsigned mClk)
+void codec_config(unsigned sampleFrequency, unsigned mClk)
 {
     timer t;
     unsigned time;
@@ -30,11 +20,11 @@ void codec_config(unsigned samFreq, unsigned mClk)
     tmp = P_GPIO_COD_RST_N;
 
     /* Set master clock select appropriately */
-    if ((samFreq % 22050) == 0)
+    if ((sampleFrequency % 22050) == 0)
     {
         tmp &= ~P_GPIO_MCLK_SEL;
     }
-    else //if((samFreq % 24000) == 0)
+    else //if((sampleFrequency % 24000) == 0)
     {
         tmp |= P_GPIO_MCLK_SEL;
     }
@@ -53,7 +43,6 @@ void codec_config(unsigned samFreq, unsigned mClk)
 
     /* Set power down bit in the CODEC over I2C */
     IIC_REGWRITE(CODEC_DEV_ID_ADDR, 0x01);
-
 
 #if DO_READ_STATUS
     /* Read CODEC device ID to make sure everything is OK */
@@ -98,5 +87,4 @@ void codec_config(unsigned samFreq, unsigned mClk)
 
     /* Clear power down bit in the CODEC over I2C */
     IIC_REGWRITE(CODEC_PWR_CTRL_ADDR, 0x00);
-
-} // codec_config
+}
