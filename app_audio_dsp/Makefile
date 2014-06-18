@@ -11,7 +11,7 @@ BUILD_FLAGS = -Wall -O3 -report -g -DSDA_HIGH=2 -DSCL_HIGH=1
 # The USED_MODULES variable lists other module used by the application. These
 # modules will extend the SOURCE_DIRS, INCLUDE_DIRS and LIB_DIRS variables.
 # Modules are expected to be in the directory above the BASE_DIR directory.
-USED_MODULES  = module_capacitive_sensing module_cascading_biquad module_dsp_utils module_i2c_single_port
+USED_MODULES  = module_capacitive_sensing module_cascading_biquad module_i2c_single_port
 USED_MODULES += module_i2s_master module_startkit_gpio module_logging
 
 XCC_FLAGS = $(BUILD_FLAGS) -fxscope
