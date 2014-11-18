@@ -16,7 +16,7 @@
 #include "lfo.h"
 #include <xs1.h>
 
-on stdcore[DSP_TILE]: startkit_gpio_ports gpio_ports =
+on tile[DSP_TILE]: startkit_gpio_ports gpio_ports =
   {XS1_PORT_32A, XS1_PORT_4A, XS1_PORT_4B, XS1_CLKBLK_3};
 
 #ifdef USE_XSCOPE
@@ -44,15 +44,15 @@ int main (void)
 
 	par
 	{
-		on stdcore[AUDIO_IO_TILE]: audio_io( c_aud_dsp ); // Audio I/O core aka I2S
+		on tile[AUDIO_IO_TILE]: audio_io( c_aud_dsp ); // Audio I/O core aka I2S
 
-		on stdcore[DSP_TILE]: dsp_biquad( c_aud_dsp ,0, i_led, i_button, c_gain ); // BiQuad filter core
+		on tile[DSP_TILE]: dsp_biquad( c_aud_dsp ,0, i_led, i_button, c_gain ); // BiQuad filter core
 
-		on stdcore[DSP_TILE]: startkit_gpio_driver(i_led, i_button,
+		on tile[DSP_TILE]: startkit_gpio_driver(i_led, i_button,
 								   i_slider_x,
 		                           i_slider_y,
 		                           gpio_ports);
-		on stdcore[DSP_TILE]: lfo(c_gain, i_slider_x, i_slider_y);
+		on tile[DSP_TILE]: lfo(c_gain, i_slider_x, i_slider_y);
 	}
 
 	return 0;
